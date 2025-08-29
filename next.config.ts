@@ -16,6 +16,13 @@ const nextConfig: NextConfig = {
   images: {
     domains: ["cdn2.thecatapi.com"], // 添加允许的图片域名
   },
+
+  // 开发模式下，打印fetch的调用结果
+  logging: {
+    fetches: {
+      fullUrl: true,
+    },
+  },
 };
 
 // 这里配置的是 打包后的分析
