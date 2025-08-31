@@ -65,7 +65,7 @@ export default function TitleBar() {
             onClick={() => setMenuOpen((prev) => !prev)}
           >
             <Image
-              src="/avatar.png"
+              src={""}
               alt="用户头像"
               className="w-8 h-8 rounded-full border"
             />
