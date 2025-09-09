@@ -21,6 +21,15 @@ const ClientFormComponent = () => {
     password: [{ required: true, message: "请输入用户密码!" }],
     againPassword: [{ required: true, message: "请重复输入用户密码!" }],
   };
+  const submit = async () => {
+    await form.validateFields();
+    let res = await fetch(`apiv1/signup/register?userId=123`, {
+      method: "POST",
+      body: JSON.stringify(form.getFieldsValue()),
+    });
+    let tempData = await res.json();
+    console.log(res, tempData, "++??res");
+  };
   return (
     <div>
       <Form form={form} labelCol={{ span: 6 }}>
@@ -47,8 +56,7 @@ const ClientFormComponent = () => {
           className="w-[200px]"
           type="primary"
           onClick={() => {
-            console.log("fetch");
-            form.validateFields()
+            submit();
           }}
         >
           注册
