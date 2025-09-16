@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
+import { ResponseResBaseType } from "../client/fetch/types";
 
 export async function withApiHandler<T>(
-  handler: () => Promise<T>,
+  handler: () => Promise<ResponseResBaseType<T>>,
   successMessage?: string
 ) {
   try {

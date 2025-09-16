@@ -33,6 +33,7 @@ const LoginPage = () => {
 
     if (res.success) {
       message.success("登录成功!");
+      router.replace("/blogs");
     } else {
       message.error(res.message || "登陆失败");
     }

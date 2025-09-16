@@ -1,3 +1,5 @@
+export const revalidate = 36000; //静态分析，60 * 60 无效，设置公共缓存时间
+
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 
