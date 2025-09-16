@@ -12,10 +12,13 @@
   },
   "dependencies": {
     "@ant-design/icons": "~5.6.1",
+    "@ant-design/v5-patch-for-react-19": "^1.0.3",
+    "@prisma/client": "^6.15.0",
     "antd": "^5.27.1",
+    "mysql2": "^3.14.5",
     "next": "^15.4.6",
     "react": "^18.2.0",
-    "react-dom": "^18",
+    "react-dom": "^18.2.0",
     "sass": "^1.91.0"
   },
   "devDependencies": {
@@ -23,8 +26,8 @@
     "@next/bundle-analyzer": "^15.5.2",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
     "cross-env": "^10.0.0",
     "eslint": "^9",
     "eslint-config-next": "15.4.6",

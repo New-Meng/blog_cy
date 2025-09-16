@@ -1,0 +1,66 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  //  这里配置的时 prisma-client的初始化默认配置，暂时保持默认不要手动配置
+  //  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  USER // 普通用户 仅查看
+  USER_SUPER // 可以发表评论的用户
+  EDITOR // 内容编辑
+  ADMIN // 管理员
+}
+
+enum UserStatus {
+  ACTIVE // 活跃
+  SUSPENDED // 停用
+  BANNED // 封禁
+}
+
+model User {
+  /// 用户唯一id
+  id            Int        @id @default(autoincrement())
+  email         String     @unique @db.VarChar(50) /// 邮箱
+  emailVerified Boolean    @default(false) // 邮箱是否已验证
+  username      String?    @unique @db.VarChar(20) /// 用户唯一名称
+  password      String?    @db.VarChar(100) /// 用户密码
+  displayName   String?    @db.VarChar(30) /// 显示名称
+  avatar        String? /// 头像
+  role          UserRole   @default(USER) /// 用户类型
+  age           Int?
+  mobile        String?    @unique()
+  status        UserStatus @default(ACTIVE) /// 1 正常 2 禁用
+  gender        Int        @default(1) /// 1 未知 2 男 3 女
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  lastLoginAt   DateTime? /// 最后登录时间
+  posts         Post[] ///用户发表的文章
+
+  @@index([email])
+  @@index([username])
+  @@index([createdAt])
+}
+
+model Post {
+  id        Int      @id @default(autoincrement())
+  title     String /// 文章标题
+  content   String /// 文章内瓤
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  published Boolean  @default(false) /// 是否公开
+
+  /// 文章作者
+  author   User @relation(fields: [authorId], references: [id])
+  authorId Int
+}
