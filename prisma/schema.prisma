@@ -34,7 +34,8 @@ model User {
   email         String     @unique @db.VarChar(50) /// 邮箱
   emailVerified Boolean    @default(false) // 邮箱是否已验证
   username      String?    @unique @db.VarChar(20) /// 用户唯一名称
-  password      String?    @db.VarChar(100) /// 用户密码
+  password      String    @db.VarChar(100) /// 用户密码
+  hashpassword  String    @db.VarChar(100) /// hash 密码
   displayName   String?    @db.VarChar(30) /// 显示名称
   avatar        String? /// 头像
   role          UserRole   @default(USER) /// 用户类型
@@ -47,6 +48,13 @@ model User {
   lastLoginAt   DateTime? /// 最后登录时间
   posts         Post[] ///用户发表的文章
 
+  /// 用户收藏的文章信息，存id
+  likes Like[] @relation("UserLikes")
+
+  /// 用户的收藏文章
+  favorites Favorite[] @relation("UserFavorites")
+
+  /// 索引字段
   @@index([email])
   @@index([username])
   @@index([createdAt])
@@ -55,7 +63,7 @@ model User {
 model Post {
   id        Int      @id @default(autoincrement())
   title     String /// 文章标题
-  content   String /// 文章内瓤
+  content   String /// 文章内容
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   published Boolean  @default(false) /// 是否公开
@@ -63,4 +71,37 @@ model Post {
   /// 文章作者
   author   User @relation(fields: [authorId], references: [id])
   authorId Int
+
+  /// 点赞功能
+  likes         Like[]     @relation("PostLikes")
+  likeCount     Int        @default(0)
+  favorites     Favorite[] @relation("PostFavorites")
+  favoriteCount Int        @default(0)
+}
+
+model Like {
+  id Int @id @default(autoincrement())
+
+  /// 关联关系，Post表 的 id 和  postId 字段关联，关联关系是  PostLikes 是一对多的关系 一个文章，可以有多个点赞
+  post   Post @relation(fields: [postId], references: [id], name: "PostLikes")
+  postId Int
+
+  /// 关联 user表 一个喜欢，对应一个user
+  user   User @relation(fields: [userId], references: [id], name: "UserLikes")
+  userId Int
+
+  // 额外字段：点赞时间
+  likedAt DateTime @default(now())
+
+  /// 防止重复点赞 一个用户，只能点赞一次
+  @@unique([userId, postId])
+}
+
+model Favorite {
+  id        Int      @id @default(autoincrement())
+  user      User     @relation(fields: [userId], references: [id], name: "UserFavorites")
+  userId    Int
+  post      Post     @relation(fields: [postId], references: [id], name: "PostFavorites")
+  postId    Int
+  createdAt DateTime @default(now())
 }

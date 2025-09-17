@@ -1,8 +1,11 @@
 import { NextResponse } from "next/server";
 import { withApiHandler } from "@/app/lib/server/api-handler";
 import { CreateUserDto } from "@/types/UserTypes/index";
+import { Prisma } from "@prisma/client";
 
 import prisma from "@/app/lib/server/db";
+
+import { hash } from "bcryptjs";
 
 export async function GET(
   request: Request,
@@ -28,7 +31,6 @@ export async function POST(
   } catch (error) {}
 
   const { searchParams } = new URL(request.url);
-  const userId = searchParams.get("userId");
 
   switch (action) {
     case "register":
@@ -58,26 +60,32 @@ export async function POST(
           }
 
           try {
+            const hashpassword = await hash(body.againPassword, 10);
             await prisma.user.create({
               data: {
                 email: body.email,
                 username: body.username,
                 password: body.password,
+                hashpassword: hashpassword,
               },
             });
             return withApiHandler(() => Promise.resolve(null), "注册成功!");
           } catch (error) {
-            if (error.code === "P2002") {
-              const targetField = error.meta?.target.split("_")?.[1];
-
-              let errorText = "";
-              if (targetField === "username") {
-                errorText = "用户名称已经存在!";
-              } else if (targetField === "mobile") {
-                errorText = "用户邮箱已经注册，请直接登录!";
+            if (error instanceof Prisma.PrismaClientKnownRequestError)
+              if (error && error?.code === "P2002") {
+                const targetField = (error?.meta?.target as string).split(
+                  "_"
+                )?.[1];
+                let errorText = "";
+                if (targetField === "username") {
+                  errorText = "用户名称已经存在!";
+                } else if (targetField === "mobile") {
+                  errorText = "用户邮箱已经注册，请直接登录!";
+                }
+                return withApiHandler(() =>
+                  Promise.reject(new Error(errorText))
+                );
               }
-              return withApiHandler(() => Promise.reject(new Error(errorText)));
-            }
             return withApiHandler(() => Promise.reject(error));
           }
         }
@@ -91,8 +99,4 @@ export async function POST(
         "Not Found"
       );
   }
-
-  console.log("POST 请求");
-  return withApiHandler(() => null, "Not Found");
-  return new Response("Not Found", { status: 404 });
 }

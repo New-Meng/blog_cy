@@ -19,20 +19,28 @@ import { useState } from "react";
 //   })
 // );
 
+interface loginBackInterface {
+  token: string;
+  userInfo: Record<string, string>;
+}
+
 const LoginPage = () => {
   const router = useRouter();
   const [form] = Form.useForm();
   const [passwordVisible, setPasswordVisible] = useState(false);
 
   const handleLogin = async () => {
-    const res = await _$fetch.post("apiv1/login/default", {
+    const res = await _$fetch.post<loginBackInterface>("apiv1/login/default", {
       method: "POST",
       body: form.getFieldsValue(),
     });
     console.log(res, "++??res");
 
     if (res.success) {
-      message.success("登录成功!");
+      if (res.data && res.data?.token) message.success("登录成功!");
+      localStorage.setItem("token", res.data.token);
+      localStorage.setItem("userInfo", JSON.stringify(res.data.userInfo));
+      localStorage;
       router.replace("/blogs");
     } else {
       message.error(res.message || "登陆失败");

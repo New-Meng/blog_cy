@@ -14,6 +14,12 @@ export class fetchApi {
     try {
       const { body, params, headers = {}, ...rest } = options;
 
+      // 模拟token登录
+      // headers.Authorization = "";
+      if (options.token) {
+        headers.Authorization = options.token;
+      }
+
       const url = new URL(`${this.baseUrl}${path}`);
 
       if (params) {

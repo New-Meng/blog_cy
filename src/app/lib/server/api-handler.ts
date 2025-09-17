@@ -1,9 +1,14 @@
 import { NextResponse } from "next/server";
 import { ResponseResBaseType } from "../client/fetch/types";
 
+type respeseType = {
+  code?: number;
+};
+
 export async function withApiHandler<T>(
-  handler: () => Promise<ResponseResBaseType<T>>,
-  successMessage?: string
+  handler: () => Promise<T>,
+  successMessage?: string,
+  options: respeseType = {}
 ) {
   try {
     const data = await handler();
@@ -11,13 +16,23 @@ export async function withApiHandler<T>(
       success: true,
       message: successMessage,
       data,
+      code: options.code || 200,
     });
   } catch (error) {
+    let errorMessage = "";
+    if (typeof error === "string") {
+      errorMessage = error;
+    } else if (error instanceof Error) {
+      errorMessage = error.message;
+    } else {
+      errorMessage = "未捕获的异常";
+    }
+
     return NextResponse.json(
       {
-        code: 500,
+        code: options.code || 500,
         success: false,
-        message: error instanceof Error ? error.message : "未捕获的错误",
+        message: errorMessage,
       },
       { status: 200 }
     );
