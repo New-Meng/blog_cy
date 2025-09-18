@@ -6,6 +6,7 @@ import { Prisma } from "@prisma/client";
 import prisma from "@/app/lib/server/db";
 
 import { hash } from "bcryptjs";
+import prasimaErrorTypeGuard from "@/app/lib/server/ErrorTypeGuard";
 
 export async function GET(
   request: Request,
@@ -71,22 +72,12 @@ export async function POST(
             });
             return withApiHandler(() => Promise.resolve(null), "注册成功!");
           } catch (error) {
-            if (error instanceof Prisma.PrismaClientKnownRequestError)
-              if (error && error?.code === "P2002") {
-                const targetField = (error?.meta?.target as string).split(
-                  "_"
-                )?.[1];
-                let errorText = "";
-                if (targetField === "username") {
-                  errorText = "用户名称已经存在!";
-                } else if (targetField === "mobile") {
-                  errorText = "用户邮箱已经注册，请直接登录!";
-                }
-                return withApiHandler(() =>
-                  Promise.reject(new Error(errorText))
-                );
-              }
-            return withApiHandler(() => Promise.reject(error));
+            const errorRes = prasimaErrorTypeGuard(error);
+            if (errorRes.code !== 0) {
+              withApiHandler(() => Promise.reject(errorRes.message));
+            } else {
+              withApiHandler(() => Promise.reject(error));
+            }
           }
         }
       } catch (error) {

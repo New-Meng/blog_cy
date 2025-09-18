@@ -17,7 +17,8 @@ export class fetchApi {
       // 模拟token登录
       // headers.Authorization = "";
       if (options.token) {
-        headers.Authorization = options.token;
+        const token = localStorage.getItem("token");
+        headers.Authorization = token || "";
       }
 
       const url = new URL(`${this.baseUrl}${path}`);

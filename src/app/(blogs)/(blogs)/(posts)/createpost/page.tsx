@@ -1,0 +1,76 @@
+"use client";
+import "@ant-design/v5-patch-for-react-19";
+import message from "antd/es/message";
+import dynamic from "next/dynamic";
+import { AsyncButton } from "@/components/client/AsyncButton";
+
+import Form from "antd/es/form";
+import { _$fetch } from "@/app/lib/client/fetch";
+import { useState } from "react";
+import CustomEditor from "../../components/CustomEditor";
+
+const Input = dynamic(() =>
+  import("antd/es/input").then((mod) => {
+    return mod;
+  })
+);
+
+const Switch = dynamic(() =>
+  import("antd/es/switch").then((mod) => {
+    return mod;
+  })
+);
+const CreatePostPage = () => {
+  const [form] = Form.useForm();
+  const postsContent = useState("");
+
+  const handlePublish = async () => {
+    const formData = form.getFieldsValue();
+    let params = {
+      ...formData,
+    };
+
+    const res = await _$fetch.post("apiv1/mypost/createpost", {
+      body: params,
+      token: true,
+    });
+    if (res.success) {
+      message.success("发布成功！");
+    } else {
+      message.error(res.message);
+    }
+  };
+
+  return (
+    <div className="w-full h-full">
+      <div className="w-[800px] h-full margin-[0__auto]">
+        <Form form={form} labelCol={{ span: 3 }}>
+          <Form.Item
+            label="文章标题"
+            name="acticleTitle"
+            rules={[{ required: true, message: "文章标题必须填写" }]}
+          >
+            <Input></Input>
+          </Form.Item>
+
+          <Form.Item label="是否公开" name="published">
+            <Switch></Switch>
+          </Form.Item>
+
+          <Form.Item
+            label="文章内容"
+            name="content"
+            rules={[{ required: true, message: "文章内容必须填写" }]}
+          >
+            {/* <Input type="textaera"></Input> */}
+            <CustomEditor></CustomEditor>
+          </Form.Item>
+        </Form>
+
+        <AsyncButton onClick={handlePublish}>发布</AsyncButton>
+      </div>
+    </div>
+  );
+};
+
+export default CreatePostPage;

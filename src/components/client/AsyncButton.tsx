@@ -8,22 +8,36 @@ const Button = dynamic(() =>
   })
 );
 
+const isAsyncFunction = (fun: () => any) => {
+  if (!fun) {
+    return false;
+  }
+  if (fun.constructor.name === "AsyncFunction") {
+    return true;
+  }
+};
+
 type InParament = {
   children: React.ReactNode;
-  onClick: () => void;
+  onClick: () => any;
   [key: string]: unknown;
 };
 
 export const AsyncButton = ({ children, onClick, ...arg }: InParament) => {
   const [loading, setLoading] = useState(false);
+  let isAsync = isAsyncFunction(onClick);
   const handleClick = async () => {
     if (loading) return;
-    setLoading(true);
-    try {
-      await onClick();
-      setLoading(false);
-    } catch (error) {
-      setLoading(false);
+    if (isAsync) {
+      setLoading(true);
+      try {
+        await onClick();
+        setLoading(false);
+      } catch (error) {
+        setLoading(false);
+      }
+    } else {
+      onClick();
     }
   };
   return (

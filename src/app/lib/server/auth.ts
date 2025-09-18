@@ -19,6 +19,7 @@ interface VerifyTokenInterface {
  */
 export const verifyToken = (req: Request): VerifyTokenInterface => {
   const token = req.headers.get("Authorization");
+  console.log(token, "++??token")
 
   if (!token) {
     return {

@@ -9,7 +9,7 @@ export async function withApiHandler<T>(
   handler: () => Promise<T>,
   successMessage?: string,
   options: respeseType = {}
-) {
+): Promise<NextResponse> {
   try {
     const data = await handler();
     return NextResponse.json({
@@ -25,6 +25,7 @@ export async function withApiHandler<T>(
     } else if (error instanceof Error) {
       errorMessage = error.message;
     } else {
+      console.log(error, "++??kk");
       errorMessage = "未捕获的异常";
     }
 

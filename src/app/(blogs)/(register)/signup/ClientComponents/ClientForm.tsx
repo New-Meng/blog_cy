@@ -1,11 +1,12 @@
 "use client";
 // antd 5 兼容 next15
 import "@ant-design/v5-patch-for-react-19";
+import message from "antd/es/message";
 import Form from "antd/es/form";
 import dynamic from "next/dynamic";
 import { CreateUserDto } from "@/types/UserTypes";
 import { AsyncButton } from "@/components/client/AsyncButton";
-import message from "antd/es/message";
+
 import { useRouter } from "next/navigation";
 import { _$fetch } from "@/app/lib/client/fetch";
 
