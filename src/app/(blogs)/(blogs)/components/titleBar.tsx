@@ -14,7 +14,7 @@ const navItems = [
   { name: "首页", href: "/blogs" },
   { name: "分类", href: "/categories" },
   { name: "标签", href: "/tags" },
-  { name: "关于", href: "/about" },
+  { name: "我的发布", href: "/mypost" },
 ];
 
 const userMenu = [

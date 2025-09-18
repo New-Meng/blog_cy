@@ -5,7 +5,7 @@ import { _$fetch } from "@/app/lib/client/fetch";
 
 const EmptyArticle = () => {
   return (
-    <div className="w-full h-[500px] flex items-center justify-center">
+    <div className="w-full min-h-[calc(100vh__-__200px)] flex items-center justify-center border-[1px] border-b-blue-300">
       数据为空
     </div>
   );

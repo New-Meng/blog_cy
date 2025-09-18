@@ -3,6 +3,7 @@ import prisma from "@/app/lib/server/db";
 import { withApiHandler } from "@/app/lib/server/api-handler";
 import { compare, hash } from "bcryptjs";
 import { sign } from "jsonwebtoken";
+import prasimaErrorTypeGuard from "@/app/lib/server/ErrorTypeGuard";
 
 export const POST = async (
   request: Request,
@@ -36,7 +37,12 @@ export const POST = async (
           });
         }
       } catch (error) {
-        return withApiHandler(() => Promise.reject(error));
+        const errorRes = prasimaErrorTypeGuard(error);
+        if (errorRes.code !== 0) {
+          return withApiHandler(() => Promise.reject(errorRes.message));
+        } else {
+          return withApiHandler(() => Promise.reject(error));
+        }
       }
 
       if (dbRes?.password) {
