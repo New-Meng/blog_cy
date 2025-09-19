@@ -17,7 +17,7 @@ export default function BlogsLayout({
   return (
     <>
       {/* 这里可以添加blogs路径特有的布局元素，如导航栏等 */}
-      <div className="w-full h-full">
+      <div className="w-full h-full overflow-hidden">
         <TitleBar></TitleBar>
         <ContentLayout>{children}</ContentLayout>
         <BottomBar></BottomBar>

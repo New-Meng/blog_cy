@@ -18,7 +18,17 @@ import {
 import "@mdxeditor/editor/style.css";
 import { useState } from "react";
 
-const CustomEditor = () => {
+type EditorEnterParams = {
+  onChange?: (val: string) => void;
+  readonly?: boolean;
+  content?: string;
+};
+
+const CustomEditor = ({
+  onChange,
+  readonly = false,
+  content = "123",
+}: EditorEnterParams) => {
   const [editorContent, setEditContent] = useState<string>("");
   const uploadImage = async (image: File) => {
     const formData = new FormData();
@@ -30,12 +40,27 @@ const CustomEditor = () => {
     const json = (await response.json()) as { url: string };
     return json.url;
   };
-  return (
-    <>
+  return readonly ? (
+    <div className="w-full">
       <MDXEditor
-        className="border-[1px] border-solids border=[#bbb] h-min-[200px]"
+        className="w-full"
+        markdown={content}
+        readOnly={true}
+        onChange={() => {}} // 空函数防止警告
+      />
+    </div>
+  ) : (
+    <div className="w-full h-[500px] border-solid border-1 border-[#bbb]">
+      <MDXEditor
+        className="w-full"
         markdown={editorContent}
-        onChange={setEditContent}
+        onChange={(val, aa) => {
+          if (onChange) {
+            onChange(val);
+          }
+
+          setEditContent(val);
+        }}
         plugins={[
           // Example Plugin Usage
           headingsPlugin(),
@@ -61,7 +86,7 @@ const CustomEditor = () => {
           }),
         ]}
       />
-    </>
+    </div>
   );
 };
 

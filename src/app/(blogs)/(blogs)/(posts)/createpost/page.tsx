@@ -34,6 +34,7 @@ const CreatePostPage = () => {
       body: params,
       token: true,
     });
+    console.log(res, "++??res");
     if (res.success) {
       message.success("发布成功！");
     } else {
@@ -43,7 +44,13 @@ const CreatePostPage = () => {
 
   return (
     <div className="w-full h-full">
-      <div className="w-[800px] h-full margin-[0__auto]">
+      <div className="flex justify-end items-center">
+        <AsyncButton className="mb-5" onClick={handlePublish}>
+          发布
+        </AsyncButton>
+      </div>
+
+      <div className="w-[1200] h-full margin-[0__auto]">
         <Form form={form} labelCol={{ span: 3 }}>
           <Form.Item
             label="文章标题"
@@ -66,8 +73,6 @@ const CreatePostPage = () => {
             <CustomEditor></CustomEditor>
           </Form.Item>
         </Form>
-
-        <AsyncButton onClick={handlePublish}>发布</AsyncButton>
       </div>
     </div>
   );

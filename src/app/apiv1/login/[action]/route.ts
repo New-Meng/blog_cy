@@ -54,7 +54,7 @@ export const POST = async (
           const token = sign(
             { userId: dbRes.id, email: dbRes.email },
             process.env.JWT_SECRET!,
-            { expiresIn: "1h" } // Token 有效期
+            { expiresIn: "1d" } // Token 有效期
           );
           return withApiHandler(
             () =>
