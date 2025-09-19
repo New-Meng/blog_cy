@@ -46,7 +46,6 @@ const MyPostPage = () => {
   }, []);
 
   return (
-<<<<<<< HEAD
     <div className="w-full h-full p-[10px] box-content">
       <div className="flex justify-end items-center">
         <AsyncButton className="mb-5" onClick={gotoRelease}>
@@ -64,10 +63,6 @@ const MyPostPage = () => {
           );
         })}
       </div>
-=======
-    <div className="w-full h-full">
-      <AsyncButton onClick={gotoRelease}>发表文章</AsyncButton>
->>>>>>> 04357c1fe93e4baf4397ad4d621da6938c3bea55
     </div>
   );
 };
