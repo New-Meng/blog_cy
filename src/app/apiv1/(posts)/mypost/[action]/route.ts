@@ -103,6 +103,8 @@ export const GET = async (
             return withApiHandler(() => Promise.reject(error));
           }
         }
+      } else {
+        return withApiHandler(() => Promise.reject("postsId参数异常"));
       }
     }
 
@@ -147,6 +149,43 @@ export const POST = async (
           } else {
             return withApiHandler(() => Promise.reject("未捕获的错误"));
           }
+        }
+      }
+    }
+
+    case "editpost": {
+      const body = await request.json();
+      const jwtValidate = verifyToken(request);
+      if (jwtValidate.code !== 200) {
+        return withApiHandler(() => Promise.reject(jwtValidate.data), "", {
+          code: jwtValidate.code,
+        });
+      } else {
+      if (body.id && !isNaN(Number(body.id))) {
+          try {
+            await prisma.post.update({
+              where: {
+                id: Number(body.id),
+              },
+              data: {
+                title: body.title,
+                content: body.content,
+                published: body.published,
+              },
+            });
+
+            return withApiHandler(() => Promise.resolve(null), "成功");
+          } catch (error) {
+            const errorType = prasimaErrorTypeGuard(error);
+
+            if (errorType.code !== 0) {
+              return withApiHandler(() => Promise.reject(errorType.message));
+            } else {
+              return withApiHandler(() => Promise.reject("未捕获的错误"));
+            }
+          }
+        } else {
+          return withApiHandler(() => Promise.reject("文章id传递错误"));
         }
       }
     }

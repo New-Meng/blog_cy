@@ -6,9 +6,9 @@ import { AsyncButton } from "@/components/client/AsyncButton";
 
 import Form from "antd/es/form";
 import { _$fetch } from "@/app/lib/client/fetch";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import CustomEditor from "../../components/CustomEditor";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 const Input = dynamic(() =>
   import("antd/es/input").then((mod) => {
@@ -24,15 +24,18 @@ const Switch = dynamic(() =>
 const PostEditPage = () => {
   const [form] = Form.useForm();
   const router = useRouter();
+  const searchParam = useSearchParams();
+  const postsId = searchParam.get("postId");
 
   const handleEditPublish = async () => {
     const formData = form.getFieldsValue();
     let params = {
       ...formData,
+      id: postsId,
     };
     console.log(formData, "++??");
 
-    const res = await _$fetch.post("apiv1/mypost/createpost", {
+    const res = await _$fetch.post("apiv1/mypost/editpost", {
       body: params,
       token: true,
     });
@@ -45,11 +48,28 @@ const PostEditPage = () => {
     }
   };
 
+  const init = async () => {
+    const res = await _$fetch.get(`apiv1/mypost/detail?postsId=${postsId}`, {
+      token: true,
+    });
+    if (res.code !== 200) {
+      message.error(res.message);
+    } else {
+      form.setFieldsValue(res.data);
+    }
+  };
+
+  const content = Form.useWatch("content", form);
+
+  useEffect(() => {
+    init();
+  }, []);
+
   return (
     <div className="w-full h-full">
       <div className="flex justify-end items-center">
         <AsyncButton className="mb-5" onClick={handleEditPublish}>
-          发布
+          发布修改
         </AsyncButton>
       </div>
 
@@ -57,7 +77,7 @@ const PostEditPage = () => {
         <Form form={form} labelCol={{ span: 3 }}>
           <Form.Item
             label="文章标题"
-            name="acticleTitle"
+            name="title"
             rules={[{ required: true, message: "文章标题必须填写" }]}
           >
             <Input></Input>
@@ -73,7 +93,7 @@ const PostEditPage = () => {
             rules={[{ required: true, message: "文章内容必须填写" }]}
           >
             {/* <Input type="textaera"></Input> */}
-            <CustomEditor></CustomEditor>
+            <CustomEditor content={content}></CustomEditor>
           </Form.Item>
         </Form>
       </div>
