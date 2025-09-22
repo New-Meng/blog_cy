@@ -16,20 +16,27 @@ import {
   type MDXEditorProps,
 } from "@mdxeditor/editor";
 import "@mdxeditor/editor/style.css";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type EditorEnterParams = {
   onChange?: (val: string) => void;
   readonly?: boolean;
   content?: string;
+  options?: {
+    minHeight?: string;
+  };
 };
 
 const CustomEditor = ({
   onChange,
   readonly = false,
-  content = "123",
+  content = "",
+  options,
 }: EditorEnterParams) => {
   const [editorContent, setEditContent] = useState<string>("");
+
+  const editorRef = useRef<MDXEditorMethods>(null);
+
   const uploadImage = async (image: File) => {
     const formData = new FormData();
     formData.append("image", image);
@@ -40,6 +47,12 @@ const CustomEditor = ({
     const json = (await response.json()) as { url: string };
     return json.url;
   };
+
+  useEffect(() => {
+    if (content) {
+      editorRef.current?.setMarkdown(content);
+    }
+  }, [content]);
   return readonly ? (
     <div className="w-full">
       <MDXEditor
@@ -50,11 +63,17 @@ const CustomEditor = ({
       />
     </div>
   ) : (
-    <div className="w-full h-[500px] border-solid border-1 border-[#bbb]">
+    <div
+      style={{
+        minHeight: options?.minHeight ? options.minHeight : "500px",
+      }}
+      className="w-full border-solid border-1 border-[#bbb]"
+    >
       <MDXEditor
+        ref={editorRef}
         className="w-full"
         markdown={editorContent}
-        onChange={(val, aa) => {
+        onChange={(val) => {
           if (onChange) {
             onChange(val);
           }

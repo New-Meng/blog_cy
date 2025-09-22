@@ -21,11 +21,11 @@ const Switch = dynamic(() =>
     return mod;
   })
 );
-const CreatePostPage = () => {
+const PostEditPage = () => {
   const [form] = Form.useForm();
   const router = useRouter();
 
-  const handlePublish = async () => {
+  const handleEditPublish = async () => {
     const formData = form.getFieldsValue();
     let params = {
       ...formData,
@@ -48,7 +48,7 @@ const CreatePostPage = () => {
   return (
     <div className="w-full h-full">
       <div className="flex justify-end items-center">
-        <AsyncButton className="mb-5" onClick={handlePublish}>
+        <AsyncButton className="mb-5" onClick={handleEditPublish}>
           发布
         </AsyncButton>
       </div>
@@ -81,4 +81,4 @@ const CreatePostPage = () => {
   );
 };
 
-export default CreatePostPage;
+export default PostEditPage;

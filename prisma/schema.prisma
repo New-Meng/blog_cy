@@ -34,8 +34,8 @@ model User {
   email         String     @unique @db.VarChar(50) /// 邮箱
   emailVerified Boolean    @default(false) // 邮箱是否已验证
   username      String?    @unique @db.VarChar(20) /// 用户唯一名称
-  password      String    @db.VarChar(100) /// 用户密码
-  hashpassword  String    @db.VarChar(100) /// hash 密码
+  password      String     @db.VarChar(100) /// 用户密码
+  hashpassword  String     @db.VarChar(100) /// hash 密码
   displayName   String?    @db.VarChar(30) /// 显示名称
   avatar        String? /// 头像
   role          UserRole   @default(USER) /// 用户类型
@@ -63,10 +63,12 @@ model User {
 model Post {
   id        Int      @id @default(autoincrement())
   title     String /// 文章标题
-  content   String /// 文章内容
+  content   String   @db.Text /// 文章内容
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   published Boolean  @default(false) /// 是否公开
+
+  deletedAt DateTime? @map("deleteAt") /// 删除时间
 
   /// 文章作者
   author   User @relation(fields: [authorId], references: [id])
@@ -77,6 +79,9 @@ model Post {
   likeCount     Int        @default(0)
   favorites     Favorite[] @relation("PostFavorites")
   favoriteCount Int        @default(0)
+
+  /// 添加索引，方便查找时过滤
+  @@index([deletedAt])
 }
 
 model Like {

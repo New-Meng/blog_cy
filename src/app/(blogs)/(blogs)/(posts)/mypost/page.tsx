@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { AsyncButton } from "@/components/client/AsyncButton";
 import { useRouter } from "next/navigation";
 import { ResponseListType } from "@/app/lib/client/fetch/types";
+import CustomEditor from "../../components/CustomEditor";
 
 type PostItemType = {
   id: number;
@@ -41,6 +42,11 @@ const MyPostPage = () => {
     router.push("/createpost");
   };
 
+  const gotoDetail = (item: any) => {
+    console.log(item, "++??item");
+    router.push(`/posts-detail?postsId=${item.id}`);
+  };
+
   useEffect(() => {
     getList();
   }, []);
@@ -56,9 +62,20 @@ const MyPostPage = () => {
       <div className="w-full h-full">
         {list.map((item) => {
           return (
-            <div className="w-full h-[150px] border-[1px] border-solid border-[#bbb] box-content p-[10px]">
+            <div
+              onClick={() => {
+                gotoDetail(item);
+              }}
+              className="cursor-pointer mb-5 w-full h-[150px] border-[1px] border-solid border-[#bbb] box-content p-[10px]"
+            >
               <div className="text-[18px] font-bold my-2">{item.title}</div>
-              <div className="text-[16px]">{item.content}</div>
+              <div className="text-[16px] max-h-[105px] overflow-hidden">
+                <CustomEditor
+                  readonly={true}
+                  content={item.content}
+                  options={{ minHeight: "150px" }}
+                ></CustomEditor>
+              </div>
             </div>
           );
         })}

@@ -13,7 +13,7 @@ export const GET = async (
   const { action } = params;
 
   switch (action) {
-    case "list":
+    case "list": {
       const validateRes = verifyToken(request);
       let userId: number | undefined = undefined;
 
@@ -38,6 +38,9 @@ export const GET = async (
             },
             select: {
               posts: {
+                where: {
+                  deletedAt: null, // 只查询未删除的 posts
+                },
                 skip: (pageNum - 1) * pageSize, // 跳过前 0 条（第一页）
                 take: pageSize, // 每页返回 10 条
                 orderBy: { createdAt: "desc" }, // 按创建时间倒序
@@ -61,6 +64,47 @@ export const GET = async (
         );
         return withApiHandler(() => Promise.resolve(responseData), "成功");
       }
+    }
+
+    case "detail": {
+      const validateRes = verifyToken(request);
+      let userId: number | undefined = undefined;
+
+      if (validateRes.code === 200) {
+        userId = validateRes.data.userId;
+      } else {
+        return withApiHandler(() => Promise.reject(validateRes.data));
+      }
+      const url = new URL(request.url);
+      const postsId = Number(url.searchParams.get("postsId"));
+      if (postsId && !isNaN(postsId)) {
+        try {
+          const dbRes = await prisma.post.findUnique({
+            where: {
+              id: postsId,
+              deletedAt: null,
+            },
+          });
+          if (!dbRes) {
+            return withApiHandler(() => Promise.reject("未查询到对应文章"));
+          } else if (dbRes?.authorId === userId) {
+            return withApiHandler(() => Promise.resolve(dbRes), "成功");
+          } else {
+            return withApiHandler(
+              () => Promise.reject(null),
+              "无权访问其他用户文章详情"
+            );
+          }
+        } catch (error) {
+          let errorRes = prasimaErrorTypeGuard(error);
+          if (errorRes.code != 0) {
+            return withApiHandler(() => Promise.reject(errorRes.message));
+          } else {
+            return withApiHandler(() => Promise.reject(error));
+          }
+        }
+      }
+    }
 
     default:
       return withApiHandler(() => Promise.reject(), "Not Font 404");
@@ -74,7 +118,7 @@ export const POST = async (
   const { action } = await params;
 
   switch (action) {
-    case "createpost":
+    case "createpost": {
       const body = await request.json();
       const jwtValidate = verifyToken(request);
       if (jwtValidate.code !== 200) {
@@ -105,6 +149,55 @@ export const POST = async (
           }
         }
       }
+    }
+
+    default:
+      return withApiHandler(() => Promise.reject("Not Found"));
+  }
+};
+
+export const DELETE = async (
+  request: Request,
+  { params }: { params: { action: string } }
+): Promise<NextResponse> => {
+  const { action } = params;
+  switch (action) {
+    case "delete": {
+      const jwtValidate = verifyToken(request);
+      if (jwtValidate.code !== 200) {
+        return withApiHandler(() => Promise.reject(jwtValidate.data), "", {
+          code: jwtValidate.code,
+        });
+      } else {
+        const url = new URL(request.url);
+        const postId = url.searchParams.get("postId");
+        try {
+          if (!postId) {
+            return withApiHandler(() => Promise.reject("文章id必须传入"));
+          } else {
+            await prisma.post.update({
+              where: {
+                id: Number(postId),
+                deletedAt: null,
+              },
+              data: {
+                deletedAt: new Date(),
+              },
+            });
+
+            return withApiHandler(() => Promise.resolve(null), "成功");
+          }
+        } catch (error) {
+          const errorType = prasimaErrorTypeGuard(error);
+
+          if (errorType.code !== 0) {
+            return withApiHandler(() => Promise.reject(errorType.message));
+          } else {
+            return withApiHandler(() => Promise.reject("未捕获的错误"));
+          }
+        }
+      }
+    }
 
     default:
       return withApiHandler(() => Promise.reject("Not Found"));
