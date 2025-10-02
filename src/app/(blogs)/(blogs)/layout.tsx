@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import TitleBar from "./components/titleBar";
 import BottomBar from "./components/bottomBar";
 import ContentLayout from "./components/contentLayout";
+import { getClientType } from "@/app/lib/client/clientType";
 
 export const metadata: Metadata = {
   title: "首页",
@@ -17,10 +18,11 @@ export default function BlogsLayout({
   return (
     <>
       {/* 这里可以添加blogs路径特有的布局元素，如导航栏等 */}
-      <div className="w-full h-full overflow-hidden">
-        <TitleBar></TitleBar>
+      <div className="w-[100vw] h-[100vh] overflow-hidden bg-[#344375]">
+        {/* <TitleBar></TitleBar>
         <ContentLayout>{children}</ContentLayout>
-        <BottomBar></BottomBar>
+        <BottomBar></BottomBar> */}
+        {children}
       </div>
     </>
   );

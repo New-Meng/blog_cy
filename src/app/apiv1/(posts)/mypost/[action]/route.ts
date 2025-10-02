@@ -30,7 +30,7 @@ export const GET = async (
         let totalPosts = 0;
         try {
           totalPosts = await prisma.post.count({
-            where: { authorId: Number(userId) },
+            where: { authorId: Number(userId), deletedAt: null },
           });
           posts = await prisma.user.findUnique({
             where: {
@@ -161,7 +161,7 @@ export const POST = async (
           code: jwtValidate.code,
         });
       } else {
-      if (body.id && !isNaN(Number(body.id))) {
+        if (body.id && !isNaN(Number(body.id))) {
           try {
             await prisma.post.update({
               where: {

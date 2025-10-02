@@ -1,4 +1,7 @@
+/* V4 需要手动引入tailwind css 的config文件, 才能生效 */
+@config "../../tailwind.config.js";
 @import url("https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&display=swap");
+
 @import "tailwindcss";
 
 :root {
