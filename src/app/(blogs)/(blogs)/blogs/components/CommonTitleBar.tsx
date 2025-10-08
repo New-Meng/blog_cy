@@ -6,7 +6,7 @@ const CommonTitleBar = () => {
   const imageHeight = 25;
   return (
     <>
-      <div className="w-full mobile:pt-3 pc:p-[20px] pc:flex pc:items-center pc:justify-between">
+      <div className="w-full mobile:pt-3 pc:flex pc:items-center pc:justify-between">
         <div className="">
           <div className="w-full flex justify-center items-center text-2xl font-bold leading-10 text-white">
             不语的抱枕
@@ -17,6 +17,9 @@ const CommonTitleBar = () => {
         </div>
 
         <div className="mobile:w-full h-12 flex justify-center items-center gap-5 text-white">
+          <div className="mobile:hidden text-black">
+            <MobileSearchInput width={200} height={30} placeholder="搜索"></MobileSearchInput>
+          </div>
           <div className="p-1 rounded-full bg-white">
             <Image
               width={imageWidth}
@@ -43,7 +46,7 @@ const CommonTitleBar = () => {
           </div>
         </div>
       </div>
-      <div className="w-full flex justify-center items-center box-content p-2 pc:display">
+      <div className="w-full flex justify-center items-center box-border p-2 pc:hidden">
         <MobileSearchInput width={200} height={30} placeholder="搜索"></MobileSearchInput>
       </div>
     </>

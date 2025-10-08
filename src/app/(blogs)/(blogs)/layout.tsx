@@ -18,11 +18,13 @@ export default function BlogsLayout({
   return (
     <>
       {/* 这里可以添加blogs路径特有的布局元素，如导航栏等 */}
-      <div className="w-[100vw] h-[100vh] overflow-hidden bg-[#344375]">
-        {/* <TitleBar></TitleBar>
+      <div className="w-[100vw] h-[100vh] overflow-hidden bg-[url('/globalbg.webp')] bg-no-repeat bg-cover bg-center">
+        <div className="pc:w-[1200px] pc:m-auto">
+          {/* <TitleBar></TitleBar>
         <ContentLayout>{children}</ContentLayout>
         <BottomBar></BottomBar> */}
-        {children}
+          {children}
+        </div>
       </div>
     </>
   );

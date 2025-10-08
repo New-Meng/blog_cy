@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 
+import { SearchOutlined } from "@ant-design/icons";
+
 type OptionsType = {
   defaultColor?: string;
   activeColor?: string;
@@ -55,13 +57,11 @@ const MobileSearchInput = ({
         width: width,
         height: height + "px",
         background: bg,
-        borderColor: focus ? options?.activeColor : options?.defaultColor,
-        border: "1px solid",
+        border: `1px solid ${focus ? options?.activeColor : options?.defaultColor}`,
         borderRadius: radis,
         boxShadow: options.showdowOptions?.isDefaulShow
-          ? `${options.showdowOptions?.color || "#bbb"} 0px 0px ${
-              options.showdowOptions?.fuzzy || "8px"
-            } 0px`
+          ? `${options.showdowOptions?.color || "#bbb"} 0px 0px ${options.showdowOptions?.fuzzy || "8px"
+          } 0px`
           : "",
       }}
     >
@@ -86,6 +86,10 @@ const MobileSearchInput = ({
           background: "transparent",
         }}
       />
+      <div className="w-[30px] h-[30px] flex justify-center items-center cursor-pointer">
+        <SearchOutlined style={{ color: "#91C8E9", fontWeight: 700 }} />
+      </div>
+
     </div>
   );
 };
