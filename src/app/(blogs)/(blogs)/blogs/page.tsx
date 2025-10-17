@@ -1,9 +1,9 @@
-"use client";
-import React, { useEffect, useState } from "react";
+import React from "react";
 
 import { _$fetch } from "@/app/lib/client/fetch";
 import CommonTitleBar from "./components/CommonTitleBar";
 import CommonClassifyWidget from "./components/CommonClassifyWidget";
+import CommonPostsContent from "./components/CommonPostsContent";
 
 const EmptyArticle = () => {
   return (
@@ -15,17 +15,24 @@ const EmptyArticle = () => {
 
 const BlogsPage = () => {
   return (
-    <div className="w-full h-auto pc:p-[20px] flex justify-start items-start mobile:flex-col">
-      {/* 纯pc */}
-      <div className="mobile:hidden w-[160px] box-border py-[20px] pr-[60px]">
-        <CommonClassifyWidget></CommonClassifyWidget>
+    <div className="w-full h-[100vh] box-border overflow-y-scroll">
+      <div className="w-full px-3 mt-6">
+        <CommonTitleBar></CommonTitleBar>
       </div>
+      <div className="relative w-full h-auto pc:p-[20px] flex justify-start items-start mobile:flex-col">
+        {/* 纯pc */}
+        <div className="mobile:hidden w-[160px] box-border py-[20px] pr-[60px]">
+          <CommonClassifyWidget></CommonClassifyWidget>
+        </div>
 
-      <CommonTitleBar></CommonTitleBar>
-      <div className="pc:hidden w-full">
-        <CommonClassifyWidget></CommonClassifyWidget>
+        <div className="pc:hidden w-full">
+          <CommonClassifyWidget></CommonClassifyWidget>
+        </div>
+
+        <div className="w-full pc:mt-[20px]">
+          <CommonPostsContent />
+        </div>
       </div>
-
     </div>
   );
 };

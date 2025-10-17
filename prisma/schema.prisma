@@ -79,9 +79,18 @@ model Post {
   likeCount     Int        @default(0)
   favorites     Favorite[] @relation("PostFavorites")
   favoriteCount Int        @default(0)
+  tags          Tag[]      @relation("PostTag")
 
   /// 添加索引，方便查找时过滤
   @@index([deletedAt])
+}
+
+model Tag {
+  id      Int    @id @default(autoincrement())
+  tagName String @db.VarChar(10)
+  posts   Post[] @relation("PostTag")
+
+  @@index([tagName])
 }
 
 model Like {

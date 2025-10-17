@@ -1,9 +1,15 @@
+"use client";
 import Image from "next/image";
 import MobileSearchInput from "./CommonSearchInput";
 
 const CommonTitleBar = () => {
   const imageWidth = 25;
   const imageHeight = 25;
+
+  const changeTheme = () => {
+    document.documentElement.classList.toggle("dark");
+  };
+
   return (
     <>
       <div className="w-full mobile:pt-3 pc:flex pc:items-center pc:justify-between">
@@ -18,7 +24,11 @@ const CommonTitleBar = () => {
 
         <div className="mobile:w-full h-12 flex justify-center items-center gap-5 text-white">
           <div className="mobile:hidden text-black">
-            <MobileSearchInput width={200} height={30} placeholder="搜索"></MobileSearchInput>
+            <MobileSearchInput
+              width={200}
+              height={30}
+              placeholder="搜索"
+            ></MobileSearchInput>
           </div>
           <div className="p-1 rounded-full bg-white">
             <Image
@@ -36,7 +46,12 @@ const CommonTitleBar = () => {
               src="/image_icon.png"
             ></Image>
           </div>
-          <div className="p-1 rounded-full bg-white">
+          <div
+            className="p-1 rounded-full bg-white"
+            onClick={() => {
+              changeTheme();
+            }}
+          >
             <Image
               width={imageWidth}
               height={imageHeight}
@@ -47,7 +62,11 @@ const CommonTitleBar = () => {
         </div>
       </div>
       <div className="w-full flex justify-center items-center box-border p-2 pc:hidden">
-        <MobileSearchInput width={200} height={30} placeholder="搜索"></MobileSearchInput>
+        <MobileSearchInput
+          width={200}
+          height={30}
+          placeholder="搜索"
+        ></MobileSearchInput>
       </div>
     </>
   );

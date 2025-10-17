@@ -39,3 +39,11 @@ body {
   align-items: center;
   height: 100%;
 }
+
+@theme {
+  --color-primas: #ff587cff;
+  --color-primas-bg: pink;
+
+  --color-dark-primas: #E6E6E6;
+  --color-dark-primas-bg: #1a1a1a;
+}

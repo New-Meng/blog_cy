@@ -17,7 +17,12 @@ export const GET = async (
       //     code: validateRes.code,
       //   });
       // }
-      return withApiHandler(() => Promise.resolve([]), "成功");
+      const res = prisma.post.findMany({
+        orderBy: {
+          createdAt: "desc", // 按创建时间降序排列（最新在前）
+        },
+      });
+      return withApiHandler(() => Promise.resolve(res), "成功");
 
     default:
       return withApiHandler(() => Promise.reject(), "Not Font 404");
