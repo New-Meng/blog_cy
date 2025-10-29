@@ -18,7 +18,8 @@ export default function BlogsLayout({
   return (
     <>
       {/* 这里可以添加blogs路径特有的布局元素，如导航栏等 */}
-      <div className="w-[100vw] h-[100vh] overflow-hidden bg-[url('/globalbg.webp1')] text-primas bg-primas-bg dark:bg-dark-primas-bg bg-no-repeat bg-cover bg-center">
+      {/* bg-[url('/globalbg.webp1')] */}
+      <div className="w-[100vw] h-[100vh] overflow-y-scroll text-primas default-bg dark:default-dark-bg bg-no-repeat bg-cover bg-center">
         <div className="pc:w-[1200px] pc:m-auto">
           {/* <TitleBar></TitleBar>
         <ContentLayout>{children}</ContentLayout>

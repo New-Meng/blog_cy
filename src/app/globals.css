@@ -44,6 +44,16 @@ body {
   --color-primas: #ff587cff;
   --color-primas-bg: pink;
 
-  --color-dark-primas: #E6E6E6;
+  --color-dark-primas: #e6e6e6;
   --color-dark-primas-bg: #1a1a1a;
+}
+
+/* 封装默认背景色 */
+@utility default-bg {
+  /* background-size: 200% 200%; */
+  background-image: linear-gradient(#ec9baa, #e066a2);
+}
+
+@utility default-dark-bg {
+  background-image: linear-gradient(#2a2a2a, #1a1a1a);
 }

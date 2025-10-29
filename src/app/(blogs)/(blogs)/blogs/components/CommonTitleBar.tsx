@@ -1,6 +1,7 @@
 "use client";
 import Image from "next/image";
 import MobileSearchInput from "./CommonSearchInput";
+import Link from "next/link";
 
 const CommonTitleBar = () => {
   const imageWidth = 25;
@@ -59,6 +60,15 @@ const CommonTitleBar = () => {
               src="/setting_icon.png"
             ></Image>
           </div>
+
+          <Link href="/createpost" className="p-1 rounded-full bg-white">
+            <Image
+              width={imageWidth}
+              height={imageHeight}
+              alt="release"
+              src="/release.png"
+            ></Image>
+          </Link>
         </div>
       </div>
       <div className="w-full flex justify-center items-center box-border p-2 pc:hidden">

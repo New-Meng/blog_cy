@@ -18,12 +18,15 @@ import {
 import "@mdxeditor/editor/style.css";
 import { useEffect, useRef, useState } from "react";
 
+import styles from "./styles.module.css";
+
 type EditorEnterParams = {
   onChange?: (val: string) => void;
   readonly?: boolean;
   content?: string;
   options?: {
     minHeight?: string;
+    maxHeight?: string;
   };
 };
 
@@ -65,9 +68,13 @@ const CustomEditor = ({
   ) : (
     <div
       style={{
-        minHeight: options?.minHeight ? options.minHeight : "500px",
+        minHeight: options?.minHeight ? options?.minHeight : "400px",
+        maxHeight: options?.maxHeight ? options?.maxHeight : "",
       }}
-      className="w-full border-solid border-1 border-[#bbb]"
+      className={
+        styles["my-classname"] +
+        "w-full border-solid border-1 border-[#bbb] rounded-md"
+      }
     >
       <MDXEditor
         ref={editorRef}

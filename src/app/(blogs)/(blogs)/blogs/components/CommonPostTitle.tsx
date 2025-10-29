@@ -28,18 +28,16 @@ const CommonPostTitle = ({ isClick = true, baseInfo, tagList }: ParamsType) => {
       </div>
 
       <div className="m-2 flex flex-wrap justify-start gap-x-2 pc:gap-x-5 gap-y-2">
-        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15].map(
-          (item, index) => {
-            return (
-              <div
-                className="px-3 py-1 bg-[#EEEEEE] cursor-pointer text-xs"
-                key={index}
-              >
-                JavaScript
-              </div>
-            );
-          }
-        )}
+        {(tagList || []).map((item, index) => {
+          return (
+            <div
+              className="px-3 py-1 bg-[#EEEEEE] cursor-pointer text-xs"
+              key={index}
+            >
+              {item?.name}
+            </div>
+          );
+        })}
       </div>
     </>
   );
