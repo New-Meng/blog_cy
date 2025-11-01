@@ -27,6 +27,33 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+
+  /* 全局滚动条样式 - 适用于Chrome、Edge、Safari等 */
+  ::-webkit-scrollbar {
+    width: 3px; /* 垂直滚动条宽度 */
+    height: 3px; /* 水平滚动条高度 */
+  }
+
+  ::-webkit-scrollbar:hover {
+    width: 4px !important;
+    height: 4px !important;
+  }
+
+  /* 滚动条轨道 */
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  /* 滚动条滑块 */
+  ::-webkit-scrollbar-thumb {
+    background: #dcd6d6;
+    border-radius: 10px;
+    cursor: pointer;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: #91c8e9;
+  }
 }
 
 .ant-popover-inner {
