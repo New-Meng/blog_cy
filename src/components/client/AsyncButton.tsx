@@ -42,7 +42,7 @@ export const AsyncButton = ({ children, onClick, ...arg }: InParament) => {
   };
   return (
     <Button {...arg} onClick={handleClick} loading={loading}>
-      <div>{children}</div>
+      <div className={`${arg?.className}`}>{children}</div>
     </Button>
   );
 };

@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "用户中心",
-  description: "用户的个人信息页",
+  title: "登录",
+  description: "登录页面",
 };
 
 export default function LoginLayout({

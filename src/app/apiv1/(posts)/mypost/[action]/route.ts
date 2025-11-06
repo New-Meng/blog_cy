@@ -1,20 +1,20 @@
 import { withApiHandler } from "@/app/lib/server/api-handler";
 import { verifyToken } from "@/app/lib/server/auth";
 import prisma from "@/app/lib/server/db";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 import prasimaErrorTypeGuard from "@/app/lib/server/ErrorTypeGuard";
 import { paginationListResponse } from "@/app/lib/server/responseModel";
 
 export const GET = async (
-  request: Request,
+  request: NextRequest,
   { params }: { params: { action: string } }
 ): Promise<NextResponse> => {
   const { action } = params;
 
   switch (action) {
     case "list": {
-      const validateRes = verifyToken(request);
+      const validateRes = await verifyToken(request);
       let userId: number | undefined = undefined;
 
       if (validateRes.code === 200) {
@@ -67,7 +67,7 @@ export const GET = async (
     }
 
     case "detail": {
-      const validateRes = verifyToken(request);
+      const validateRes = await verifyToken(request);
       let userId: number | undefined = undefined;
 
       if (validateRes.code === 200) {
@@ -114,7 +114,7 @@ export const GET = async (
 };
 
 export const POST = async (
-  request: Request,
+  request: NextRequest,
   { params }: { params: { action: string } }
 ): Promise<NextResponse> => {
   const { action } = await params;
@@ -122,7 +122,7 @@ export const POST = async (
   switch (action) {
     case "createpost": {
       const body = await request.json();
-      const jwtValidate = verifyToken(request);
+      const jwtValidate = await verifyToken(request);
       if (jwtValidate.code !== 200) {
         return withApiHandler(() => Promise.reject(jwtValidate.data), "", {
           code: jwtValidate.code,
@@ -155,7 +155,7 @@ export const POST = async (
 
     case "editpost": {
       const body = await request.json();
-      const jwtValidate = verifyToken(request);
+      const jwtValidate = await verifyToken(request);
       if (jwtValidate.code !== 200) {
         return withApiHandler(() => Promise.reject(jwtValidate.data), "", {
           code: jwtValidate.code,
@@ -196,13 +196,13 @@ export const POST = async (
 };
 
 export const DELETE = async (
-  request: Request,
+  request: NextRequest,
   { params }: { params: { action: string } }
 ): Promise<NextResponse> => {
   const { action } = params;
   switch (action) {
     case "delete": {
-      const jwtValidate = verifyToken(request);
+      const jwtValidate = await verifyToken(request);
       if (jwtValidate.code !== 200) {
         return withApiHandler(() => Promise.reject(jwtValidate.data), "", {
           code: jwtValidate.code,

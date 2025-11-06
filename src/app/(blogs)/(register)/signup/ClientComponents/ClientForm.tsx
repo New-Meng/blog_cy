@@ -6,6 +6,7 @@ import Form from "antd/es/form";
 import dynamic from "next/dynamic";
 import { CreateUserDto } from "@/types/UserTypes";
 import { AsyncButton } from "@/components/client/AsyncButton";
+import CustomInput from "@/components/client/CustomInput";
 
 import { useRouter } from "next/navigation";
 import { _$fetch } from "@/app/lib/client/fetch";
@@ -64,7 +65,6 @@ const ClientFormComponent = () => {
           <Input placeholder="请重复输入密码"></Input>
         </Form.Item>
       </Form>
-
       <div className="w-full flex justify-center items-center">
         <AsyncButton
           className="h- w-[200px]"

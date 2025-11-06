@@ -2,7 +2,7 @@ import { LoginDefaultDto } from "@/types/UserTypes";
 import prisma from "@/app/lib/server/db";
 import { withApiHandler } from "@/app/lib/server/api-handler";
 import { compare, hash } from "bcryptjs";
-import { sign } from "jsonwebtoken";
+const { SignJWT } = require("jose");
 import prasimaErrorTypeGuard from "@/app/lib/server/ErrorTypeGuard";
 
 export const POST = async (
@@ -51,12 +51,17 @@ export const POST = async (
         let isValida = await compare(body.password, hashpassword);
         if (isValida) {
           // 2. 生成 JWT
-          const token = sign(
-            { userId: dbRes.id, email: dbRes.email },
-            process.env.JWT_SECRET!,
-            { expiresIn: "1d" } // Token 有效期
-          );
-          return withApiHandler(
+          const secretBuffer = Buffer.from(process.env.JWT_SECRET!);
+          const token = await new SignJWT({
+            userId: dbRes.id,
+            email: dbRes.email,
+          })
+            .setProtectedHeader({ alg: "HS256" })
+            .setIssuedAt(Date.now())
+            .setExpirationTime("1d")
+            .sign(secretBuffer);
+
+          const response = await withApiHandler(
             () =>
               Promise.resolve({
                 token: token,
@@ -64,6 +69,15 @@ export const POST = async (
               }),
             "登录成功!"
           );
+          // 设置cookie 暂时不用cookie
+          response.headers.set(
+            "Set-Cookie",
+            `Authorization=${token}; Path=/; HttpOnly; SameSite=Strict; Max-Age=${
+              60 * 60 * 24
+            }` // 1天有效期
+          );
+
+          return response;
         } else {
           return withApiHandler(() =>
             Promise.reject(new Error("账号密码错误，请重新登录!"))

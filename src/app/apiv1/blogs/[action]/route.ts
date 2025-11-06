@@ -1,6 +1,5 @@
 import prisma from "@/app/lib/server/db";
 import { withApiHandler } from "@/app/lib/server/api-handler";
-import { verifyToken } from "@/app/lib/server/auth";
 
 export const GET = async (
   request: Request,
@@ -10,19 +9,40 @@ export const GET = async (
 
   switch (action) {
     case "list":
-      // 测试用的，文章列表，无需验证权限
-      // const validateRes = verifyToken(request);
-      // if (!validateRes.success) {
-      //   return withApiHandler(() => Promise.reject(validateRes.data), "", {
-      //     code: validateRes.code,
-      //   });
-      // }
-      const res = prisma.post.findMany({
+      const url = new URL(request.url);
+      const pageNo = Number(url.searchParams.get("pageNo") || 1);
+      const title = url.searchParams.get("title") || "";
+      const pageSize = 2;
+      console.log(pageNo, pageSize, "++??pagination");
+
+      const PasimaWhereObj = title
+        ? {
+            title: {
+              contains: title, // 类似 SQL 的 LIKE '%关键词%'
+              // mode: "insensitive", // 不区分大小写 报错 可能不存在这个方法
+            },
+          }
+        : {};
+
+      const res = await prisma.post.findMany({
+        take: pageSize,
+        skip: (pageNo - 1) * pageSize,
+        where: { ...PasimaWhereObj },
         orderBy: {
           createdAt: "desc", // 按创建时间降序排列（最新在前）
         },
       });
-      return withApiHandler(() => Promise.resolve(res), "成功");
+      const totalPosts = await prisma.post.count({
+        where: { ...PasimaWhereObj },
+      });
+      const returnRes = {
+        list: res,
+        total: totalPosts,
+        pageSize: pageSize,
+        pageNo: pageNo,
+      };
+
+      return withApiHandler(() => Promise.resolve(returnRes), "成功");
 
     default:
       return withApiHandler(() => Promise.reject(), "Not Font 404");

@@ -1,9 +1,6 @@
 // utils/auth.ts
-import jwt, {
-  JsonWebTokenError,
-  TokenExpiredError,
-  NotBeforeError,
-} from "jsonwebtoken";
+import { jwtVerify } from "jose";
+import { NextRequest } from "next/server";
 
 interface VerifyTokenInterface {
   success: boolean;
@@ -17,9 +14,16 @@ interface VerifyTokenInterface {
  * @param res Next.js 响应对象
  * @returns 验证成功返回 decoded payload，失败返回 null
  */
-export const verifyToken = (req: Request): VerifyTokenInterface => {
-  const token = req.headers.get("Authorization");
-  console.log(token, "++??token")
+export const verifyToken = async (
+  req: NextRequest
+): Promise<VerifyTokenInterface> => {
+  let token = req.cookies.get("Authorization")?.value; // 优先从cookie中获取token
+
+  if (!token) {
+    token = req.headers.get("Authorization") || ""; // 如果cookie中没有，则从Authorization头部获取
+  }
+
+  console.log(token, "++??token");
 
   if (!token) {
     return {
@@ -30,34 +34,32 @@ export const verifyToken = (req: Request): VerifyTokenInterface => {
   }
 
   try {
+    const secret = new TextEncoder().encode(process.env.JWT_SECRET!);
+    const { payload } = await jwtVerify(token, secret);
+
     return {
       success: true,
-      data: jwt.verify(token, process.env.JWT_SECRET!),
+      data: payload,
       code: 200,
     };
-  } catch (err) {
-    if (err instanceof JsonWebTokenError) {
-      return {
-        success: false,
-        data: "Invalid token",
-        code: 401,
-      };
-    } else if (err instanceof TokenExpiredError) {
+  } catch (err: any) {
+    console.log(err, "++??err");
+    if (err?.code == "ERR_JWT_EXPIRED") {
       return {
         success: false,
         data: "Token expired",
         code: 403,
       };
-    } else if (err instanceof NotBeforeError) {
+    } else if (err?.code == "ERR_JWT_INVALID") {
       return {
         success: false,
-        data: "Token not active",
-        code: 403,
+        data: "Invalid token",
+        code: 401,
       };
     } else {
       return {
         success: false,
-        data: "未知的错误",
+        data: "身份验证，未知的错误",
         code: 400,
       };
     }

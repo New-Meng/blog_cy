@@ -67,6 +67,17 @@ body {
   height: 100%;
 }
 
+input::placeholder {
+  color: var(--placeholder-color, #ccc) !important;
+  /* 
+   * var() 函数解析：
+   * - 首先查找 --placeholder-color 变量
+   * - 如果找到，使用该值
+   * - 如果没找到，使用后备值 #ccc
+   * !important 确保优先级最高
+   */
+}
+
 @theme {
   --color-primas: #ff587cff;
   --color-primas-bg: pink;

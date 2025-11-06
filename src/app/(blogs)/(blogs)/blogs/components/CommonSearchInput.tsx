@@ -18,6 +18,7 @@ type boxShadowType = {
 };
 
 type InputParamsType = {
+  onSearch?: (val: string) => void;
   onChange?: (val: any) => void;
   value?: string;
   height?: number;
@@ -39,6 +40,7 @@ const defaultOptions = {
 };
 
 const MobileSearchInput = ({
+  onSearch,
   onChange,
   value,
   height = 30,
@@ -50,6 +52,8 @@ const MobileSearchInput = ({
 }: InputParamsType) => {
   const [focus, setFocus] = useState(false);
 
+  const [inputValue, setInputValue] = useState(value || "");
+
   return (
     <div
       className="w-full flex items-center justify-center overflow-hidden px-2 text-sm"
@@ -57,11 +61,14 @@ const MobileSearchInput = ({
         width: width,
         height: height + "px",
         background: bg,
-        border: `1px solid ${focus ? options?.activeColor : options?.defaultColor}`,
+        border: `1px solid ${
+          focus ? options?.activeColor : options?.defaultColor
+        }`,
         borderRadius: radis,
         boxShadow: options.showdowOptions?.isDefaulShow
-          ? `${options.showdowOptions?.color || "#bbb"} 0px 0px ${options.showdowOptions?.fuzzy || "8px"
-          } 0px`
+          ? `${options.showdowOptions?.color || "#bbb"} 0px 0px ${
+              options.showdowOptions?.fuzzy || "8px"
+            } 0px`
           : "",
       }}
     >
@@ -70,13 +77,16 @@ const MobileSearchInput = ({
         defaultValue={value}
         onChange={(val) => {
           const value = val.target.value;
+          setInputValue(value);
           onChange?.(value);
         }}
         onFocus={() => {
           setFocus(true);
         }}
-        onBlur={() => {
+        onBlur={(e) => {
+          console.log(e, "++??e");
           setFocus(false);
+          onSearch?.(e.target.value);
         }}
         style={{
           border: "none",
@@ -86,10 +96,12 @@ const MobileSearchInput = ({
           background: "transparent",
         }}
       />
-      <div className="w-[30px] h-[30px] flex justify-center items-center cursor-pointer">
+      <div
+        onClick={() => onSearch?.(inputValue)}
+        className="w-[30px] h-[30px] flex justify-center items-center cursor-pointer"
+      >
         <SearchOutlined style={{ color: "#91C8E9", fontWeight: 700 }} />
       </div>
-
     </div>
   );
 };

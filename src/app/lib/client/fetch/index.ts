@@ -1,5 +1,4 @@
 import { RequestOptions, MethodStr, ResponseResBaseType } from "./types";
-
 export class fetchApi {
   private baseUrl = "";
   constructor(baseUrl: string = process.env.NEXT_PUBLIC_API_BASE_URL || "") {
@@ -42,10 +41,10 @@ export class fetchApi {
         body: isFormData ? body : body ? JSON.stringify(body) : undefined,
         ...rest,
       });
-
+      console.log(response, "++??kkresponse");
       if (!response.ok) {
         const error = await response.json().catch(() => ({}));
-        console.error(
+        console.log(
           error.message || `Request failed with status ${response.status}`
         );
 

@@ -13,7 +13,13 @@ const EmptyArticle = () => {
   );
 };
 
-const BlogsPage = () => {
+const BlogsPage = ({
+  searchParams,
+}: {
+  searchParams: { pageNo?: string; title?: string };
+}) => {
+  const pageNo = searchParams.pageNo || "1";
+  const title = searchParams.title || "";
   return (
     <div className="w-full h-[100vh] box-border overflow-y-scroll">
       <div className="w-full px-3 mt-6">
@@ -30,7 +36,7 @@ const BlogsPage = () => {
         </div>
 
         <div className="w-full pc:mt-[20px]">
-          <CommonPostsContent />
+          <CommonPostsContent pageNo={pageNo} title={title} />
         </div>
       </div>
     </div>

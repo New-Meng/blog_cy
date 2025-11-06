@@ -1,0 +1,39 @@
+/* 分页容器 */
+.custom-pagination {
+  padding: 20px 0;
+  display: flex;
+  justify-content: center;
+}
+
+/* 默认分页项样式 */
+.custom-pagination :global(.ant-pagination .ant-pagination-item-active) {
+  border: 0px solid #fff;
+  background-color: #6b46c1;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+.custom-pagination :global(.ant-pagination .ant-pagination-item-active a) {
+  color: #ffffff;
+}
+
+.custom-pagination
+  :global(
+    .ant-pagination .ant-pagination-item:not(.ant-pagination-item-active):hover
+  ) {
+  border-color: #c2a8ff !important;
+  background-color: #c2a8ff !important;
+}
+
+.custom-pagination
+  :global(
+    .ant-pagination
+      .ant-pagination-item:not(.ant-pagination-item-active):hover
+      a
+  ) {
+  color: #ffffff !important;
+}
+
+.custom-pagination :global(.ant-pagination-item-link .anticon) {
+  color: #ffffff;
+}

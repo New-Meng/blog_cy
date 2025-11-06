@@ -2,14 +2,34 @@
 import Image from "next/image";
 import MobileSearchInput from "./CommonSearchInput";
 import Link from "next/link";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 
-const CommonTitleBar = () => {
+const CommonTitleBar: React.FC = () => {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
   const imageWidth = 25;
   const imageHeight = 25;
+
+  const [title, setTitle] = useState("");
 
   const changeTheme = () => {
     document.documentElement.classList.toggle("dark");
   };
+
+  const handleSearch = (val: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("title", val);
+    router.push(`${pathname}?${params.toString()}`);
+  };
+
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams.toString());
+    const titleStr = params.get("title");
+    setTitle(titleStr || "");
+  }, []);
 
   return (
     <>
@@ -29,6 +49,8 @@ const CommonTitleBar = () => {
               width={200}
               height={30}
               placeholder="搜索"
+              value={title}
+              onSearch={handleSearch}
             ></MobileSearchInput>
           </div>
           <div className="p-1 rounded-full bg-white">
@@ -76,6 +98,8 @@ const CommonTitleBar = () => {
           width={200}
           height={30}
           placeholder="搜索"
+          value={title}
+          onSearch={handleSearch}
         ></MobileSearchInput>
       </div>
     </>
