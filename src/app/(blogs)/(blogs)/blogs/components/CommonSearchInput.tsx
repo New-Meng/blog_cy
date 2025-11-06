@@ -53,6 +53,11 @@ const MobileSearchInput = ({
   const [focus, setFocus] = useState(false);
 
   const [inputValue, setInputValue] = useState(value || "");
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
+    if (e?.key === "Enter") {
+      onSearch?.(inputValue);
+    }
+  };
 
   return (
     <div
@@ -75,6 +80,7 @@ const MobileSearchInput = ({
       <input
         placeholder={placeholder}
         defaultValue={value}
+        onKeyDown={handleKeyDown}
         onChange={(val) => {
           const value = val.target.value;
           setInputValue(value);
