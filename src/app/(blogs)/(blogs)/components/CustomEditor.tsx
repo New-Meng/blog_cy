@@ -84,7 +84,7 @@ const CustomEditor = ({
           if (onChange) {
             onChange(val);
           }
-
+          console.log(val)
           setEditContent(val);
         }}
         plugins={[

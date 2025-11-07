@@ -14,7 +14,7 @@ export class fetchApi {
       const { body, params, headers = {}, ...rest } = options;
 
       // 模拟token登录
-      // headers.Authorization = "";
+      // headers.Authorization = "";  1107 改成cookie验证
       if (options.token) {
         const token = localStorage.getItem("token");
         headers.Authorization = token || "";
@@ -42,6 +42,11 @@ export class fetchApi {
         ...rest,
       });
       console.log(response, "++??kkresponse");
+      // 如果被告知重定向，则重定向到新的URL
+      if (response.redirected) {
+        window.location.href = response.url;
+        throw new Error("302重定向");
+      }
       if (!response.ok) {
         const error = await response.json().catch(() => ({}));
         console.log(

@@ -1,6 +1,6 @@
 import { _$fetch } from "@/app/lib/client/fetch";
 import React from "react";
-import CommonPostTitle from "./CommonPostTitle";
+import CommonPostTitle from "./ComonpostTitle/index";
 import { marked } from "marked";
 import PaginationWidget from "./PaginationWidget/PaginationWidget";
 import { headers } from "next/headers";
@@ -49,12 +49,6 @@ const CommonPostsContent = async ({
   const current = res.data.pageNo;
   const pageSize = res.data.pageSize;
   console.log(res, "++??res");
-  // res.data.forEach((item) => {
-  //   let firstRow = item.content.split("\n\n");
-  //   item.firstRowHtml = firstRow[0] || "";
-  // });
-
-  const a = await convertListToHtml(res.data.list);
 
   return (
     <>
@@ -68,7 +62,11 @@ const CommonPostsContent = async ({
               <div className="my-2">
                 <CommonPostTitle
                   isClick={true}
-                  baseInfo={{ title: item.title, createdAt: item.createdAt }}
+                  baseInfo={{
+                    title: item.title,
+                    createdAt: item.createdAt,
+                    postId: item.id,
+                  }}
                 ></CommonPostTitle>
               </div>
 

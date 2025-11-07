@@ -26,10 +26,7 @@ const MyPostPage = () => {
   const [list, setList] = useState<PostListType>([]);
   const getList = async () => {
     const res = await _$fetch.get<ResponseListType<PostListType>>(
-      "/apiv1/mypost/list",
-      {
-        token: true,
-      }
+      "/apiv1/mypost/list"
     );
     if (res.code != 200) {
       message.error(res.message);

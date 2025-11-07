@@ -42,21 +42,19 @@ const PostDetailPage = () => {
   const [confirmLoading, setConfirmLoading] = useState(false);
 
   const searchParam = useSearchParams();
-  const postsId = searchParam.get("postsId");
+  const postsId = searchParam.get("postId");
 
   const init = async () => {
-    if (typeof postsId === "string") {
-      const res = await _$fetch.get<DetailType>("apiv1/mypost/detail", {
-        params: { postsId: postsId },
-        token: true,
-        catch: true,
-      });
-      if (res.code == 200) {
-        setDetail(res.data);
-        console.log("init", res.data);
-      } else {
-        message.error(res.message);
-      }
+    const res = await _$fetch.get<DetailType>("apiv1/mypost/detail", {
+      params: { postsId: postsId || "" },
+      catch: true,
+    });
+    console.log(res, "++??res");
+    if (res.code == 200) {
+      setDetail(res.data);
+      console.log("init", res.data);
+    } else {
+      message.error(res.message);
     }
   };
 
@@ -68,10 +66,7 @@ const PostDetailPage = () => {
     setConfirmLoading(true);
     try {
       const res = await _$fetch.delete(
-        `apiv1/mypost/delete?postId=${detail?.id}`,
-        {
-          token: true,
-        }
+        `apiv1/mypost/delete?postId=${detail?.id}`
       );
       if (res.code == 200) {
         message.success("删除成功");
@@ -93,7 +88,7 @@ const PostDetailPage = () => {
 
   return (
     <div className="w-full h-full">
-      <div className="w-[1200] h-full margin-[0__auto]">
+      <div className="w-[full] pc:w-[1200] h-full margin-[0__auto]">
         <div className="flex justify-end items-center h-[50px] gap-[20px] box-content pr-[20px]">
           <div
             className="cursor-pointer hover:text-[#2381FF]"

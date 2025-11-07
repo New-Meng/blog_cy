@@ -1,4 +1,5 @@
 import dayjs from "dayjs";
+import TitleText from "./titleText";
 
 type ParamsType = {
   isClick?: boolean;
@@ -6,15 +7,16 @@ type ParamsType = {
   baseInfo: PostBaseInfo;
 };
 
-type PostBaseInfo = {
+export type PostBaseInfo = {
   createdAt: Date | string;
   title: string;
+  postId: string | number;
 };
 const CommonPostTitle = ({ isClick = true, baseInfo, tagList }: ParamsType) => {
   return (
     <>
       <div className="h-full article-title flex items-start justify-between">
-        <div className="text-xl font-bold">{baseInfo?.title || ""}</div>
+        <TitleText baseInfo={baseInfo} />
         <div className="flex flex-col justify-center items-start gao-[4px]">
           <div className="">
             {baseInfo.createdAt

@@ -73,7 +73,15 @@ export const GET = async (
       if (validateRes.code === 200) {
         userId = validateRes.data.userId;
       } else {
-        return withApiHandler(() => Promise.reject(validateRes.data));
+        if (validateRes.code == 401 || validateRes.code == 403) {
+          // 验证失败，滚去登录
+          return NextResponse.redirect(
+            new URL(`/login?errorData=${validateRes.data}`, request.url)
+          );
+        } else {
+          // 未知的验证异常
+          return withApiHandler(() => Promise.reject(validateRes.data));
+        }
       }
       const url = new URL(request.url);
       const postsId = Number(url.searchParams.get("postsId"));

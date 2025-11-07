@@ -35,7 +35,6 @@ const CreatePostPage = () => {
 
     const res = await _$fetch.post("apiv1/mypost/createpost", {
       body: params,
-      token: true,
     });
     console.log(res, "++??res");
     if (res.success) {
@@ -79,9 +78,7 @@ const CreatePostPage = () => {
             </Form.Item>
 
             <Form.Item
-              help={
-                <span style={{ color: "#ff4d4f" }}></span>
-              }
+              help={<span style={{ color: "#ff4d4f" }}></span>}
               label="文章内容"
               name="content"
               rules={[{ required: true, message: "文章内容必须填写" }]}

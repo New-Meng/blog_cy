@@ -2,7 +2,7 @@
 import "@ant-design/v5-patch-for-react-19";
 import dynamic from "next/dynamic";
 import Form from "antd/es/form";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { GithubOutlined } from "@ant-design/icons";
 import { Space, Input } from "antd";
 import { EyeInvisibleOutlined, EyeTwoTone } from "@ant-design/icons";
@@ -12,7 +12,7 @@ import { AsyncButton } from "@/components/client/AsyncButton";
 import CustomInput from "@/components/client/CustomInput";
 
 import { _$fetch } from "@/app/lib/client/fetch";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 // const Input = dynamic(() =>
 //   import("antd/es/input").then((mod) => {
@@ -27,8 +27,8 @@ interface loginBackInterface {
 
 const LoginPage = () => {
   const router = useRouter();
-  const [form] = Form.useForm();
-  const [passwordVisible, setPasswordVisible] = useState(false);
+  const searchParams = useSearchParams();
+
   const [passWord, setPassWord] = useState("");
   const [userName, setUserName] = useState("");
 
@@ -51,6 +51,13 @@ const LoginPage = () => {
       message.error(res.message || "登陆失败");
     }
   };
+
+  useEffect(() => {
+    const errorData = searchParams.get("errorData");
+    if (errorData) {
+      message.error(errorData);
+    }
+  }, []);
 
   return (
     <div className="relative w-[100vw] h-[100vh] default-bg dark:default-bg-dark mobile:pt-[100px]">

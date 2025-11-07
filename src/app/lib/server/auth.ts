@@ -17,18 +17,15 @@ interface VerifyTokenInterface {
 export const verifyToken = async (
   req: NextRequest
 ): Promise<VerifyTokenInterface> => {
-  let token = req.cookies.get("Authorization")?.value; // 优先从cookie中获取token
-
-  if (!token) {
-    token = req.headers.get("Authorization") || ""; // 如果cookie中没有，则从Authorization头部获取
-  }
+  // 从 cookie中获取 token
+  let token = req.cookies.get("Authorization")?.value;
 
   console.log(token, "++??token");
 
   if (!token) {
     return {
       success: false,
-      data: "token 未传入",
+      data: "当前页面需登录访问，请先登录",
       code: 401,
     };
   }
@@ -47,19 +44,19 @@ export const verifyToken = async (
     if (err?.code == "ERR_JWT_EXPIRED") {
       return {
         success: false,
-        data: "Token expired",
+        data: "登录过期，请重新登录",
         code: 403,
       };
     } else if (err?.code == "ERR_JWT_INVALID") {
       return {
         success: false,
-        data: "Invalid token",
+        data: "token验证失败, 请重新登录",
         code: 401,
       };
     } else {
       return {
         success: false,
-        data: "身份验证，未知的错误",
+        data: "身份验证失败，未知的错误",
         code: 400,
       };
     }

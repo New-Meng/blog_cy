@@ -37,7 +37,6 @@ const PostEditPage = () => {
 
     const res = await _$fetch.post("apiv1/mypost/editpost", {
       body: params,
-      token: true,
     });
     console.log(res, "++??res");
     if (res.success) {
@@ -49,9 +48,7 @@ const PostEditPage = () => {
   };
 
   const init = async () => {
-    const res = await _$fetch.get(`apiv1/mypost/detail?postsId=${postsId}`, {
-      token: true,
-    });
+    const res = await _$fetch.get(`apiv1/mypost/detail?postsId=${postsId}`);
     if (res.code !== 200) {
       message.error(res.message);
     } else {
