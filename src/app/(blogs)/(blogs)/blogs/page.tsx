@@ -22,20 +22,20 @@ const BlogsPage = ({
   const title = searchParams.title || "";
   return (
     <div className="w-full h-[100vh] box-border overflow-y-scroll">
-      <div className="w-full px-3 mt-6">
+      <div className="w-full px-3 mt-6 fade-in-left">
         <CommonTitleBar></CommonTitleBar>
       </div>
       <div className="relative w-full h-auto pc:p-[20px] flex justify-start items-start mobile:flex-col">
         {/* 纯pc */}
-        <div className="mobile:hidden w-[160px] box-border py-[20px] pr-[60px]">
+        <div className="mobile:hidden w-[160px] box-border py-[20px] pr-[60px] fade-in-left">
           <CommonClassifyWidget></CommonClassifyWidget>
         </div>
 
-        <div className="pc:hidden w-full">
+        <div className="pc:hidden w-full fade-in-left">
           <CommonClassifyWidget></CommonClassifyWidget>
         </div>
 
-        <div className="w-full pc:mt-[20px]">
+        <div className="w-full pc:mt-[20px] fade-in-left">
           <CommonPostsContent pageNo={pageNo} title={title} />
         </div>
       </div>
