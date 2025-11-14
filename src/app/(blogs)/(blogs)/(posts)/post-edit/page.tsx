@@ -34,6 +34,8 @@ const PostEditPage = () => {
       id: postsId,
     };
     console.log(formData, "++??");
+    // \n\n 转化br标签为<br />
+    params.content = params.content.replace(/\n\n/g, "<br />");
 
     const res = await _$fetch.post("apiv1/mypost/editpost", {
       body: params,

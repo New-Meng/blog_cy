@@ -5,7 +5,7 @@ import {
   quotePlugin,
   thematicBreakPlugin,
   markdownShortcutPlugin,
-  MDXEditor,
+  // MDXEditor,
   toolbarPlugin,
   UndoRedo,
   BoldItalicUnderlineToggles,
@@ -13,12 +13,26 @@ import {
   imagePlugin,
   InsertImage,
   type MDXEditorMethods,
-  type MDXEditorProps,
 } from "@mdxeditor/editor";
 import "@mdxeditor/editor/style.css";
 import { useEffect, useRef, useState } from "react";
 
 import styles from "./styles.module.css";
+import dynamic from "next/dynamic";
+
+// 坑："use client" 组件，在服务端也会执行，只不过 useEffect等方法，只会在客户端执行
+// 如果 客户端组件，内部的其他组件，有使用 随机数 、 WindowAPI  时间戳 那么服务端渲染会报错
+// 如果有时间戳，随机数，初始赋值 null ,然后在 useEffect中赋值即可避免初始水合异常
+const MDXEditor = dynamic(
+  () =>
+    import("@mdxeditor/editor").then((mod) => {
+      // 可以在这里配置插件等
+      return mod.MDXEditor;
+    }),
+  {
+    ssr: false,
+  }
+);
 
 type EditorEnterParams = {
   onChange?: (val: string) => void;
@@ -37,7 +51,6 @@ const CustomEditor = ({
   options,
 }: EditorEnterParams) => {
   const [editorContent, setEditContent] = useState<string>("");
-
   const editorRef = useRef<MDXEditorMethods>(null);
 
   const uploadImage = async (image: File) => {
@@ -53,6 +66,7 @@ const CustomEditor = ({
 
   useEffect(() => {
     if (content) {
+      console.log(content, "++??content");
       editorRef.current?.setMarkdown(content);
     }
   }, [content]);
@@ -81,10 +95,12 @@ const CustomEditor = ({
         className="w-full"
         markdown={editorContent}
         onChange={(val) => {
+          console.log({ kk: val }, "++??valEditorChange");
+
           if (onChange) {
             onChange(val);
           }
-          console.log(val)
+          console.log(val);
           setEditContent(val);
         }}
         plugins={[

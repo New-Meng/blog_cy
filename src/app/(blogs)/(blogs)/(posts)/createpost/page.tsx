@@ -10,6 +10,7 @@ import { useState } from "react";
 import CustomEditor from "../../components/CustomEditor";
 import { useRouter } from "next/navigation";
 import { ConfigProvider } from "antd";
+import { extractFirstTwoParagraphs } from "@/app/lib/client/clientType";
 
 const Input = dynamic(() =>
   import("antd/es/input").then((mod) => {
@@ -22,6 +23,7 @@ const Switch = dynamic(() =>
     return mod;
   })
 );
+
 const CreatePostPage = () => {
   const [form] = Form.useForm();
   const router = useRouter();
@@ -31,8 +33,11 @@ const CreatePostPage = () => {
     let params = {
       ...formData,
     };
-    console.log(formData, "++??");
-
+    // \n\n 转化br标签为<br />
+    params.content = params.content.replace(/\n\n/g, "<br />");
+    params.previewContent = extractFirstTwoParagraphs(params.content);
+    console.log(params, "++??params");
+    return;
     const res = await _$fetch.post("apiv1/mypost/createpost", {
       body: params,
     });

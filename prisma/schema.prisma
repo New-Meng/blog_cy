@@ -64,6 +64,7 @@ model Post {
   id        Int      @id @default(autoincrement())
   title     String /// 文章标题
   content   String   @db.Text /// 文章内容
+  previewContent String? /// 文章预览内容
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   published Boolean  @default(false) /// 是否公开
