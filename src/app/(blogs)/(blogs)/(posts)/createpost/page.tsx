@@ -34,10 +34,13 @@ const CreatePostPage = () => {
       ...formData,
     };
     // \n\n 转化br标签为<br />
-    params.content = params.content.replace(/\n\n/g, "<br />");
-    params.previewContent = extractFirstTwoParagraphs(params.content);
-    console.log(params, "++??params");
-    return;
+    const replaceStr = "<br />";
+    params.content = params.content.replace(/\n\n/g, replaceStr);
+    params.previewContent = extractFirstTwoParagraphs(
+      params.content,
+      replaceStr
+    );
+
     const res = await _$fetch.post("apiv1/mypost/createpost", {
       body: params,
     });

@@ -5,19 +5,15 @@ import CommonTitleBar from "./components/CommonTitleBar";
 import CommonClassifyWidget from "./components/CommonClassifyWidget";
 import CommonPostsContent from "./components/CommonPostsContent";
 
-const EmptyArticle = () => {
-  return (
-    <div className=" w-full min-h-[calc(100vh__-__200px)] flex items-center justify-center border-[1px]">
-      数据为空
-    </div>
-  );
-};
-
-const BlogsPage = ({
+const BlogsPage = async ({
+  params,
   searchParams,
 }: {
-  searchParams: { pageNo?: string; title?: string };
+  searchParams: { pageNo?: string; title?: string; slug: string[] };
+  params: { slug: string[] };
 }) => {
+  const tag = params?.slug?.length > 0 ? params.slug[0] : "";
+  console.log(tag, "++??slug");
   const pageNo = searchParams.pageNo || "1";
   const title = searchParams.title || "";
   return (
@@ -36,7 +32,7 @@ const BlogsPage = ({
         </div>
 
         <div className="w-full pc:mt-[20px] fade-in-left">
-          <CommonPostsContent pageNo={pageNo} title={title} />
+          <CommonPostsContent tag={tag} pageNo={pageNo} title={title} />
         </div>
       </div>
     </div>

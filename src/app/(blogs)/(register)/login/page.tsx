@@ -9,7 +9,7 @@ import { EyeInvisibleOutlined, EyeTwoTone } from "@ant-design/icons";
 import message from "antd/es/message";
 
 import { AsyncButton } from "@/components/client/AsyncButton";
-import CustomInput from "@/components/client/CustomInput";
+import CustomInput from "@/components/client/customInput";
 
 import { _$fetch } from "@/app/lib/client/fetch";
 import { useEffect, useState } from "react";

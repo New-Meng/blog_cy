@@ -36,6 +36,7 @@
     "cross-env": "^10.0.0",
     "eslint": "^9",
     "eslint-config-next": "15.4.6",
+    "prisma": "^6.19.0",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

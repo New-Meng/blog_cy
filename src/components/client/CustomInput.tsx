@@ -1,7 +1,9 @@
+"use client";
 import Password from "antd/es/input/Password";
 import React, { useState } from "react";
 
 type PropsType = {
+  type?: string;
   eyes?: boolean;
   label?: string;
   labelSize?: string;
@@ -27,6 +29,7 @@ const CustomInput: React.FC<PropsType> = ({
   placeholder = "",
   className = "",
   eyes = false,
+  type = "text",
   onChange,
   value,
 }) => {
@@ -67,7 +70,7 @@ const CustomInput: React.FC<PropsType> = ({
           onChange={handleChange}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
-          type={showPassword ? "password" : "text"}
+          type={type}
         />
 
         {eyes ? (

@@ -6,7 +6,7 @@ import Form from "antd/es/form";
 import dynamic from "next/dynamic";
 import { CreateUserDto } from "@/types/UserTypes";
 import { AsyncButton } from "@/components/client/AsyncButton";
-import CustomInput from "@/components/client/CustomInput";
+import CustomInput from "@/components/client/customInput";
 
 import { useRouter } from "next/navigation";
 import { _$fetch } from "@/app/lib/client/fetch";

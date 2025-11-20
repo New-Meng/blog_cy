@@ -28,6 +28,15 @@ enum UserStatus {
   BANNED // 封禁
 }
 
+enum CommentStatus {
+  PENDING // 待审核
+  APPROVED // 已审核
+  REJECTED // 已拒绝
+  HIDDEN // 已隐藏
+  NORMAL // 正常状态
+  DELETE // 删除状态
+}
+
 model User {
   /// 用户唯一id
   id            Int        @id @default(autoincrement())
@@ -54,6 +63,8 @@ model User {
   /// 用户的收藏文章
   favorites Favorite[] @relation("UserFavorites")
 
+  comment Comment[] @relation("UserComments")
+
   /// 索引字段
   @@index([email])
   @@index([username])
@@ -61,13 +72,13 @@ model User {
 }
 
 model Post {
-  id        Int      @id @default(autoincrement())
-  title     String /// 文章标题
-  content   String   @db.Text /// 文章内容
+  id             Int      @id @default(autoincrement())
+  title          String /// 文章标题
+  content        String   @db.Text /// 文章内容
   previewContent String? /// 文章预览内容
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  published Boolean  @default(false) /// 是否公开
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  published      Boolean  @default(false) /// 是否公开
 
   deletedAt DateTime? @map("deleteAt") /// 删除时间
 
@@ -80,18 +91,40 @@ model Post {
   likeCount     Int        @default(0)
   favorites     Favorite[] @relation("PostFavorites")
   favoriteCount Int        @default(0)
-  tags          Tag[]      @relation("PostTag")
+  postTags      PostTag[] /// 显示关系指定
+  // tags          Tag[]      @relation("PostTag")
+  // postTags      PostTag[]
+  // postTags      PostTag[]
+
+  comments Comment[] @relation("PostComments")
 
   /// 添加索引，方便查找时过滤
   @@index([deletedAt])
 }
 
 model Tag {
-  id      Int    @id @default(autoincrement())
-  tagName String @db.VarChar(10)
-  posts   Post[] @relation("PostTag")
+  id       Int       @id @default(autoincrement())
+  tagName  String    @db.VarChar(10)
+  postTags PostTag[] /// 显示关系指定
+  /// posts    Post[]    @relation("PostTag") /// 隐式关系，中间表由 prisma 自动创建
+  // postTags PostTag[]
 
   @@index([tagName])
+}
+
+// 手动创建 文章标签之间的关联表
+model PostTag {
+  id        Int      @id @default(autoincrement())
+  postId    Int
+  tagId     Int
+  createdAt DateTime @default(now())
+
+  // 定义管理文章标签之间的关联关系
+  post Post @relation(fields: [postId], references: [id])
+  tag  Tag  @relation(fields: [tagId], references: [id])
+
+  // 可选：添加唯一约束
+  @@unique([postId, tagId])
 }
 
 model Like {
@@ -119,4 +152,30 @@ model Favorite {
   post      Post     @relation(fields: [postId], references: [id], name: "PostFavorites")
   postId    Int
   createdAt DateTime @default(now())
+}
+
+// 评论模型
+model Comment {
+  id     Int  @id @default(autoincrement())
+  user   User @relation(fields: [userId], references: [id], name: "UserComments")
+  userId Int
+  post   Post @relation(fields: [postId], references: [id], name: "PostComments")
+  postId Int
+
+  parentId Int? /// 父评论id
+  status   CommentStatus @default(NORMAL) // 评论状态
+
+  visitorName  String /// 评论者姓名
+  visitorEmail String /// 评论者邮箱
+
+  content   String    @db.Text /// 评论内容
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime? // 软删除
+  ipAddress String    @db.Text /// 评论者ip地址
+  userAgent String    @db.Text // 请求头信息
+
+  @@index([postId, status, createdAt])
+  @@index([parentId, createdAt])
+  @@map("comment") // 映射数据库中，实际表名称
 }

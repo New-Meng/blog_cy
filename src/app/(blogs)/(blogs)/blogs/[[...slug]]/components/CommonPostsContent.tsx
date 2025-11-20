@@ -4,6 +4,7 @@ import CommonPostTitle from "./ComonpostTitle/index";
 import { marked } from "marked";
 import PaginationWidget from "./PaginationWidget/PaginationWidget";
 import { headers } from "next/headers";
+import CustomEditor from "../../../components/CustomEditor";
 
 type ListItemType = {
   title: string;
@@ -16,7 +17,7 @@ type ListItemType = {
   authorId: number;
   likeCount: number;
   favoriteCount: number;
-  firstRowHtml?: string;
+  previewContent?: string;
 };
 
 type ListResponseType = {
@@ -37,18 +38,30 @@ const convertListToHtml = async (list: ListItemType[]) => {
 const CommonPostsContent = async ({
   pageNo,
   title,
+  tag,
 }: {
   pageNo: string;
   title: string;
+  tag: string;
 }) => {
-  const res = await _$fetch.get<ListResponseType>(
-    `apiv1/blogs/list?pageNo=${pageNo}&title=${title}`
-  );
-  const list = res.data.list || [];
-  const total = res.data.total;
-  const current = res.data.pageNo;
-  const pageSize = res.data.pageSize;
-  console.log(res, "++??res");
+  let list: ListItemType[] = [];
+  let total = 0;
+  let current = 1;
+  let pageSize = 10;
+  let isSeverError = false;
+  try {
+    const res = await _$fetch.get<ListResponseType>(
+      `apiv1/blogs/list?pageNo=${pageNo}&title=${title}&tag=${tag}`
+    );
+    console.log(res.data, "++??list");
+    list = res.data.list || [];
+    total = res.data.total;
+    current = res.data.pageNo;
+    pageSize = res.data.pageSize;
+    console.log(res, "++??res");
+  } catch (error) {
+    isSeverError = true;
+  }
 
   return (
     <>
@@ -70,14 +83,20 @@ const CommonPostsContent = async ({
                 ></CommonPostTitle>
               </div>
 
-              <div
-                dangerouslySetInnerHTML={{ __html: item.firstRowHtml || "" }}
-              ></div>
+              <CustomEditor
+                readonly={true}
+                content={item.previewContent || ""}
+              ></CustomEditor>
             </div>
           );
         })}
       </div>
-      <PaginationWidget total={total} current={current} pageSize={pageSize} />
+      <PaginationWidget
+        isSeverError={isSeverError}
+        total={total}
+        current={current}
+        pageSize={pageSize}
+      />
     </>
   );
 };

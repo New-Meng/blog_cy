@@ -145,6 +145,7 @@ export const POST = async (
               content: body.content,
               published: body.published,
               authorId: userId,
+              previewContent: body.previewContent,
             },
           });
 

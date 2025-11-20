@@ -5,6 +5,10 @@ import prisma from "@/app/lib/server/db";
 import prasimaErrorTypeGuard from "@/app/lib/server/ErrorTypeGuard";
 import CustomEditor from "../../components/CustomEditor";
 
+import CommonTitleBar from "../../blogs/[[...slug]]/components/CommonTitleBar";
+import CommonClassifyWidget from "../../blogs/[[...slug]]/components/CommonClassifyWidget";
+import CustomComment from "@/components/client/CustomComment";
+
 type DetailType = {
   id: number;
   createdAt: Date;
@@ -45,22 +49,40 @@ const postView = async ({ searchParams }: searchEnterParams) => {
   console.log(detail, "++??resdetail");
 
   return (
-    <div className="w-full h-full">
-      <div className="w-[full] pc:w-[1200] h-full margin-[0__auto]">
-        <div className="p-2">
-          <div className="px-2 py-3 rounded-sm text-[18px] font-bold bg-white">
-            {detail?.title}
-          </div>
+    <div className="w-full h-[100vh] box-border overflow-y-scroll">
+      <div className="w-full px-3 mt-6 fade-in-left">
+        <CommonTitleBar></CommonTitleBar>
+      </div>
+      <div className="relative w-full h-auto pc:p-[20px] flex justify-start items-start mobile:flex-col">
+        {/* 纯pc */}
+        <div className="mobile:hidden w-[160px] box-border py-[20px] pr-[60px] fade-in-left">
+          <CommonClassifyWidget></CommonClassifyWidget>
+        </div>
 
-          {detail?.content && (
-            <div className="mt-2 px-2 py-3 rounded-sm bg-white">
-              <CustomEditor
-                readonly={true}
-                content={detail?.content}
-                options={{ minHeight: "500px" }}
-              ></CustomEditor>
+        <div className="pc:hidden w-full fade-in-left">
+          <CommonClassifyWidget></CommonClassifyWidget>
+        </div>
+
+        <div className="w-full pc:mt-[20px] fade-in-left">
+          <div className="w-[full] h-full margin-[0__auto]">
+            <div className="p-2">
+              <div className="px-2 py-3 rounded-sm text-[18px] font-bold bg-white">
+                {detail?.title}
+              </div>
+
+              {detail?.content && (
+                <div className="mt-2 px-2 py-3 rounded-sm bg-white">
+                  <CustomEditor
+                    readonly={true}
+                    content={detail?.content}
+                    options={{ minHeight: "500px" }}
+                  ></CustomEditor>
+                </div>
+              )}
             </div>
-          )}
+
+            <CustomComment></CustomComment>
+          </div>
         </div>
       </div>
     </div>

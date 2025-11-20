@@ -55,6 +55,7 @@ export const POST = async (
           const token = await new SignJWT({
             userId: dbRes.id,
             email: dbRes.email,
+            username: dbRes.username,
           })
             .setProtectedHeader({ alg: "HS256" })
             .setIssuedAt(Date.now())

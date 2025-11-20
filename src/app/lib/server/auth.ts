@@ -2,7 +2,7 @@
 import { jwtVerify } from "jose";
 import { NextRequest } from "next/server";
 
-interface VerifyTokenInterface {
+export interface VerifyTokenInterface {
   success: boolean;
   data: any;
   code: number;

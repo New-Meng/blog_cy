@@ -15,9 +15,23 @@ export const getClientType = (): "pc" | "mobile" | Error => {
   }
 };
 
-export const extractFirstTwoParagraphs = (mdxContent: string) => {
+export const extractFirstTwoParagraphs = (
+  mdxContent: string,
+  replaceStr: string
+) => {
   // 方法1: 简单按换行分割（适用于标准段落）
-  const paragraphs = mdxContent.split("\n\n");
-  const firstTwo = paragraphs.slice(0, 2);
-  return firstTwo.join("\n\n");
+  const paragraphs = mdxContent.split(replaceStr);
+  let strIndex = 0;
+  const firstTwo = paragraphs.reduce((pre, next) => {
+    let nextStr = next ? next : replaceStr;
+    if (next) {
+      strIndex += 1;
+    }
+    if (strIndex < 2 || strIndex == 2) {
+      return (pre += nextStr);
+    } else {
+      return pre;
+    }
+  }, "");
+  return firstTwo;
 };

@@ -4,20 +4,28 @@ import styles from "./Pagination.module.css";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
-const NoDataWidget = () => {
-  return (
+const NoDataWidget = (props: OhterPropsType) => {
+  return props.isSeverError ? (
+    <div className="flex justify-center items-center text-[#fff]">
+      服务坏掉了哦~~
+    </div>
+  ) : (
     <div className="flex justify-center items-center text-[#fff]">
       没有数据哦~~
     </div>
   );
 };
 
-const PaginationWidget = (props: PaginationProps) => {
+type OhterPropsType = {
+  isSeverError: boolean;
+};
+
+const PaginationWidget = (props: PaginationProps & OhterPropsType) => {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const [routing, setRouting  ] = useState(false);
+  const [routing, setRouting] = useState(false);
 
   const onPageNoChange = (pageNo: number) => {
     console.log(pageNo, "++??pageNo");
@@ -40,7 +48,7 @@ const PaginationWidget = (props: PaginationProps) => {
           {...props}
         ></Pagination>
       ) : (
-        <NoDataWidget />
+        <NoDataWidget isSeverError={props.isSeverError} />
       )}
       {routing && (
         <div className="flex justify-center items-center text-[#7044C1]">

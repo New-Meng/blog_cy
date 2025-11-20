@@ -12,7 +12,11 @@ export const GET = async (
       const url = new URL(request.url);
       const pageNo = Number(url.searchParams.get("pageNo") || 1);
       const title = url.searchParams.get("title") || "";
-      const pageSize = 2;
+      const tag = url.searchParams.get("type") || "";
+      let pageSize = Number(url.searchParams.get("pageSize")) || 10;
+      if (pageSize > 10) {
+        pageSize = 10;
+      }
       console.log(pageNo, pageSize, "++??pagination");
 
       const PasimaWhereObj = title
