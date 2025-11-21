@@ -1,4 +1,7 @@
-import { withApiHandler } from "@/app/lib/server/api-handler";
+import {
+  validateRequestBody,
+  withApiHandler,
+} from "@/app/lib/server/api-handler";
 import { verifyToken, VerifyTokenInterface } from "@/app/lib/server/auth";
 import prisma from "@/app/lib/server/db";
 import { NextRequest, NextResponse } from "next/server";
@@ -86,9 +89,12 @@ export const POST = async (
   switch (action) {
     case "create": {
       const validateRes = await verifyToken(request);
-
       try {
-        const body: CreateCommentDto = await request.json();
+        const validateBody = await validateRequestBody(request);
+        if (!validateBody.success) {
+          return withApiHandler(() => Promise.reject(validateBody.message));
+        }
+        const body: CreateCommentDto = validateBody.body;
         try {
           await createValidateEntry(body, validateRes);
         } catch (error) {}
@@ -128,6 +134,98 @@ export const POST = async (
           console.error("创建评论错误:", error);
           return withApiHandler(() => Promise.reject("创建评论时发生错误"));
         }
+      }
+    }
+
+    case "delete": {
+      const validateRes = await verifyToken(request);
+      if (validateRes.code == 200) {
+        const validateBody = await validateRequestBody(request);
+        if (!validateBody.success) {
+          return withApiHandler(() => Promise.reject(validateBody.message));
+        }
+
+        const postId = Number(validateBody.body?.postId);
+        const commentId = Number(validateBody.body?.commentId);
+        if (!postId || isNaN(postId) || !commentId || isNaN(commentId)) {
+          return withApiHandler(() =>
+            Promise.reject("文章ID或评论ID不能为空或无效")
+          );
+        }
+
+        try {
+          const res = await prisma.comment.updateMany({
+            where: {
+              id: commentId,
+              postId,
+              deletedAt: null,
+            },
+            data: {
+              deletedAt: new Date(),
+            },
+          });
+
+          if (res.count === 0) {
+            return withApiHandler(() => Promise.reject("评论不存在或已删除"));
+          }
+          return withApiHandler(() => Promise.resolve(null), "删除成功");
+        } catch (error) {
+          const errorType = prasimaErrorTypeGuard(error);
+          if (errorType.code !== 0) {
+            return withApiHandler(() => Promise.reject(errorType.message));
+          } else {
+            return withApiHandler(() => Promise.reject("删除评论时发生错误"));
+          }
+        }
+      } else {
+        return withApiHandler(() => Promise.reject(validateRes.data), "", {
+          code: validateRes.code,
+        });
+      }
+    }
+
+    default:
+      return withApiHandler(() => Promise.reject("Not Found"));
+  }
+};
+
+export const GET = async (
+  request: NextRequest,
+  { params }: { params: { action: string } }
+): Promise<NextResponse> => {
+  const { action } = await params;
+
+  switch (action) {
+    case "get": {
+      const url = new URL(request.url);
+      let postId = Number(url.searchParams.get("postId"));
+
+      if (!postId || isNaN(postId)) {
+        return withApiHandler(() => Promise.reject("文章ID不能为空或无效"));
+      } else {
+        const dbRes = await prisma.comment.findMany({
+          where: {
+            postId: postId,
+          },
+          // 指定返回字段，和 join user 返回字段
+          select: {
+            id: true,
+            content: true,
+            createdAt: true,
+            visitorName: true,
+            visitorEmail: true,
+
+            user: {
+              select: {
+                id: true,
+                username: true,
+                avatar: true, // 只选择需要的字段
+                // 不包含 email 等敏感信息
+              },
+            },
+          },
+        });
+        return withApiHandler(() => Promise.resolve(dbRes || []));
       }
     }
 

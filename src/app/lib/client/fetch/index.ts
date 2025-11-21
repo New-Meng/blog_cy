@@ -12,6 +12,8 @@ export class fetchApi {
   ): Promise<ResponseResBaseType<T>> {
     try {
       const { body, params, headers = {}, ...rest } = options;
+      // 移除 “/” 开头的路径
+      path = path.replace(/^\/+/, "");
 
       // 模拟token登录
       // headers.Authorization = "";  1107 改成cookie验证

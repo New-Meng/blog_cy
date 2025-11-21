@@ -2,7 +2,7 @@ export type RequestOptions = {
   method?: MethodStr;
   headers?: Record<string, string>;
   body?: any;
-  params?: Record<string, string>;
+  params?: Record<string, string | number>;
   signal?: AbortSignal;
   catch?: boolean; // 是否缓存
   token?: boolean; // 是否携带token

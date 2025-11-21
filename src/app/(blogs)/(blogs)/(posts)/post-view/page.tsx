@@ -8,6 +8,8 @@ import CustomEditor from "../../components/CustomEditor";
 import CommonTitleBar from "../../blogs/[[...slug]]/components/CommonTitleBar";
 import CommonClassifyWidget from "../../blogs/[[...slug]]/components/CommonClassifyWidget";
 import CustomComment from "@/components/client/CustomComment";
+import CommentListWidget from "@/components/client/CommentListWidget";
+import { CommentProvider } from "./CommentProvider";
 
 type DetailType = {
   id: number;
@@ -22,10 +24,10 @@ type DetailType = {
 };
 
 type searchEnterParams = {
-  searchParams: { postId?: number };
+  searchParams: { postId: number };
 };
 
-const getPostDetailInfo = async (postId: number | null) => {
+const getPostDetailInfo = async (postId: number) => {
   if (postId && !isNaN(postId)) {
     try {
       const dbRes = await prisma.post.findUnique({
@@ -44,7 +46,7 @@ const getPostDetailInfo = async (postId: number | null) => {
 };
 
 const postView = async ({ searchParams }: searchEnterParams) => {
-  const postId = Number(searchParams.postId) || null;
+  const postId = Number(searchParams.postId);
   const detail = await getPostDetailInfo(postId);
   console.log(detail, "++??resdetail");
 
@@ -81,7 +83,11 @@ const postView = async ({ searchParams }: searchEnterParams) => {
               )}
             </div>
 
-            <CustomComment></CustomComment>
+            <CommentProvider>
+              <CommentListWidget postId={postId}></CommentListWidget>
+
+              <CustomComment postId={postId}></CustomComment>
+            </CommentProvider>
           </div>
         </div>
       </div>
