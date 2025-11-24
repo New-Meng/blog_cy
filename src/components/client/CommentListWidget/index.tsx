@@ -7,14 +7,22 @@ import { useCommentContext } from "@/app/(blogs)/(blogs)/(posts)/post-view/Comme
 
 export interface CommentItem {
   id: string;
+  postId: string;
   user: {
     id: string;
     username: string;
     avatar?: string;
   };
+  // 可能是匿名用户
+  visitorName?: string;
+  visitorEmail?: string;
   content: string;
   createdAt: string; // ISO 字符串
-  replies?: CommentItem[];
+  parentName?: string;
+  parentId?: string; // 父评论ID，用于回复
+  rootId?: string; // 根评论ID，用于回复线程
+
+  children?: CommentItem[];
 }
 
 const getList = async (postId: number) => {
@@ -37,19 +45,109 @@ const CommentItem: React.FC<{
   depth: number;
   setSelectedReply?: (item: CommentItem) => void;
 }> = ({ item, depth, setSelectedReply }) => {
-  const { setParentId, setParentName } = useCommentContext() || {};
+  const { parentInfo, setParentInfo } = useCommentContext() || {};
+  console.log(item, "++??item");
+  return item?.children && item.children.length > 0 ? (
+    <>
+      <div className="flex space-x-3 py-3 border-b border-gray-100 last:border-0">
+        {/* 头像 */}
+        <Avatar
+          src={item?.user?.avatar}
+          alt={item?.visitorName || item?.user?.username || "匿名用户"}
+          size={40}
+          onClick={() => {
+            console.log(item);
+          }}
+        />
 
-  return (
+        <div className="flex-1 ml-3">
+          {/* 用户名 & 时间 */}
+          <div className="flex justify-between items-center pr-2">
+            <div className="flex items-center space-x-4 text-sm relative">
+              <span className="font-semibold  text-gray-900">
+                {item?.visitorName || item?.user?.username || "匿名用户"}
+              </span>
+              <span className="text-gray-500 space-x-2">
+                {dayjs(item.createdAt).format("YYYY-MM-DD HH:mm:ss")}
+              </span>
+            </div>
+            <div
+              className="flex items-center space-x-2 text-sm text-gray-500 cursor-pointer"
+              onClick={() => {
+                setParentInfo?.(() => {
+                  return item;
+                });
+              }}
+            >
+              <span className="font-semibold">回复</span>
+            </div>
+          </div>
+
+          {/* 评论内容 */}
+          <p className="mt-1 text-gray-800 break-words">{item.content}</p>
+        </div>
+      </div>
+      {item.children.map((cItem) => {
+        return (
+          <div className="flex space-x-3 pl-5 py-3 border-b border-gray-100 last:border-0">
+            {/* 头像 */}
+            <Avatar
+              src={cItem?.user?.avatar}
+              alt={cItem?.visitorName || cItem?.user?.username || "匿名用户"}
+              size={40}
+              onClick={() => {
+                console.log(cItem);
+              }}
+            />
+
+            <div className="flex-1 ml-3">
+              {/* 用户名 & 时间 */}
+              <div className="flex justify-between items-center pr-2">
+                <div className="flex items-center space-x-4 text-sm relative">
+                  <span className="font-semibold  text-gray-900">
+                    {cItem?.visitorName || cItem?.user?.username || "匿名用户"}
+                  </span>
+                  <span className="text-gray-500 space-x-2">
+                    {dayjs(cItem.createdAt).format("YYYY-MM-DD HH:mm:ss")}
+                  </span>
+                </div>
+                <div
+                  className="flex items-center space-x-2 text-sm text-gray-500 cursor-pointer"
+                  onClick={() => {
+                    setParentInfo?.(() => {
+                      return cItem;
+                    });
+                  }}
+                >
+                  <span className="font-semibold">回复</span>
+                </div>
+              </div>
+
+              {/* 评论内容 */}
+              <p className="mt-1 text-gray-800 break-words">{cItem.content}</p>
+            </div>
+          </div>
+        );
+      })}
+    </>
+  ) : (
     <div className="flex space-x-3 py-3 border-b border-gray-100 last:border-0">
       {/* 头像 */}
-      <Avatar src={item.user.avatar} alt={item.user.username} size={40} />
+      <Avatar
+        src={item?.user?.avatar}
+        alt={item?.visitorName || item?.user?.username || "匿名用户"}
+        size={40}
+        onClick={() => {
+          console.log(item);
+        }}
+      />
 
       <div className="flex-1 ml-3">
         {/* 用户名 & 时间 */}
         <div className="flex justify-between items-center pr-2">
           <div className="flex items-center space-x-4 text-sm relative">
             <span className="font-semibold  text-gray-900">
-              {item.user.username}
+              {item?.visitorName || item?.user?.username || "匿名用户"}
             </span>
             <span className="text-gray-500 space-x-2">
               {dayjs(item.createdAt).format("YYYY-MM-DD HH:mm:ss")}
@@ -58,8 +156,9 @@ const CommentItem: React.FC<{
           <div
             className="flex items-center space-x-2 text-sm text-gray-500 cursor-pointer"
             onClick={() => {
-              setParentId?.(item.id);
-              setParentName?.(item.user.username);
+              setParentInfo?.(() => {
+                return item;
+              });
             }}
           >
             <span className="font-semibold">回复</span>

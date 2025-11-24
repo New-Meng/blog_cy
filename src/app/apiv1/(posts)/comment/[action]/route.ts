@@ -6,7 +6,6 @@ import { verifyToken, VerifyTokenInterface } from "@/app/lib/server/auth";
 import prisma from "@/app/lib/server/db";
 import { NextRequest, NextResponse } from "next/server";
 import prasimaErrorTypeGuard from "@/app/lib/server/ErrorTypeGuard";
-import { JWTPayload } from "jose";
 
 const createValidateEntry = (
   body: CreateCommentDto,
@@ -23,22 +22,24 @@ const createValidateEntry = (
     }
 
     if (
-      !body.visitorName ||
-      (!body.visitorName.trim() && validateRes.data.username)
+      !body.visitorName &&
+      !body.visitorName.trim() &&
+      !validateRes.data.username
     ) {
       return reject("访客名称不能为空");
     }
 
     if (
-      !body.visitorEmail ||
-      (!body.visitorEmail.trim() && validateRes.data.username)
+      !body.visitorEmail &&
+      !body.visitorEmail.trim() &&
+      !validateRes.data.email
     ) {
       return reject("访客邮箱不能为空");
     }
 
     // 邮箱格式验证
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(body.visitorEmail)) {
+    if (!emailRegex.test(body.visitorEmail || validateRes.data.email)) {
       return reject("邮箱格式不正确");
     }
 
@@ -72,10 +73,32 @@ const createValidateEntry = (
   });
 };
 
+const listToDeepTree = (list: any[]) => {
+  const postParentMap: Record<string | number, any> = {};
+  list.forEach((item) => {
+    if (!item.rootId) {
+      postParentMap[item.id] = item;
+    }
+  });
+
+  list.forEach((item) => {
+    if (item.rootId) {
+      const parent = postParentMap[item.rootId];
+      parent.children = parent.children || [];
+      parent.children.push(item);
+    }
+  });
+  const res = Object.keys(postParentMap).map((key) => {
+    return postParentMap[key];
+  });
+  return res;
+};
+
 interface CreateCommentDto {
   content: string;
   postId: number;
   parentId?: number;
+  rootId?: number;
   visitorName: string;
   visitorEmail: string;
 }
@@ -86,9 +109,10 @@ export const POST = async (
 ): Promise<NextResponse> => {
   const { action } = await params;
 
+  const validateRes = await verifyToken(request);
+
   switch (action) {
     case "create": {
-      const validateRes = await verifyToken(request);
       try {
         const validateBody = await validateRequestBody(request);
         if (!validateBody.success) {
@@ -96,8 +120,10 @@ export const POST = async (
         }
         const body: CreateCommentDto = validateBody.body;
         try {
-          await createValidateEntry(body, validateRes);
-        } catch (error) {}
+          const validateResult = await createValidateEntry(body, validateRes);
+        } catch (error) {
+          return withApiHandler(() => Promise.reject(error));
+        }
         // 创建评论
         const comment = await prisma.comment.create({
           data: {
@@ -105,6 +131,7 @@ export const POST = async (
             postId: body.postId,
             userId: validateRes ? validateRes.data.userId : undefined,
             parentId: body.parentId ? Number(body.parentId) : undefined,
+            rootId: body.rootId ? Number(body.rootId) : undefined,
             visitorName: body.visitorName.trim(),
             visitorEmail: body.visitorEmail.trim(),
             ipAddress:
@@ -210,6 +237,8 @@ export const GET = async (
           // 指定返回字段，和 join user 返回字段
           select: {
             id: true,
+            rootId: true,
+            parentId: true,
             content: true,
             createdAt: true,
             visitorName: true,
@@ -224,8 +253,14 @@ export const GET = async (
               },
             },
           },
+          orderBy: {
+            createdAt: "asc", // 按创建时间排序，确保子评论在父评论之后
+          },
         });
-        return withApiHandler(() => Promise.resolve(dbRes || []));
+
+        const resultList = listToDeepTree(dbRes);
+        console.log(resultList, "++??kk");
+        return withApiHandler(() => Promise.resolve(resultList || []));
       }
     }
 

@@ -65,6 +65,8 @@ model User {
 
   comment Comment[] @relation("UserComments")
 
+  commentApplyUser Comment[] @relation("CommentApplyUser")
+
   /// 索引字段
   @@index([email])
   @@index([username])
@@ -156,17 +158,22 @@ model Favorite {
 
 // 评论模型
 model Comment {
-  id     Int  @id @default(autoincrement())
-  user   User @relation(fields: [userId], references: [id], name: "UserComments")
-  userId Int
-  post   Post @relation(fields: [postId], references: [id], name: "PostComments")
+  id     Int   @id @default(autoincrement())
+  user   User? @relation(fields: [userId], references: [id], name: "UserComments")
+  userId Int?
+  post   Post  @relation(fields: [postId], references: [id], name: "PostComments")
   postId Int
 
   parentId Int? /// 父评论id
+  rootId   Int? /// 根评论id
   status   CommentStatus @default(NORMAL) // 评论状态
 
   visitorName  String /// 评论者姓名
   visitorEmail String /// 评论者邮箱
+
+  applyUser   User? @relation(fields: [applyUserId], references: [id], name: "CommentApplyUser")
+  applyUserId Int? /// 关联申请id
+  tempApplyUserName String? /// 临时申请用户名
 
   content   String    @db.Text /// 评论内容
   createdAt DateTime  @default(now())
@@ -174,6 +181,9 @@ model Comment {
   deletedAt DateTime? // 软删除
   ipAddress String    @db.Text /// 评论者ip地址
   userAgent String    @db.Text // 请求头信息
+
+  link   String? /// 评论点赞数量
+  unLink String? /// 评论点踩数量
 
   @@index([postId, status, createdAt])
   @@index([parentId, createdAt])
