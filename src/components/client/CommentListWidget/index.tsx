@@ -29,7 +29,7 @@ export interface CommentItem {
     avatar?: string;
   };
 
-  unlike?: boolean; // 是否点踩了
+  isUnLike?: boolean; // 是否点踩了
   isLike?: boolean; // 是否点赞了
 
   children?: CommentItem[];
@@ -53,14 +53,13 @@ const getList = async (postId: number) => {
 const CommentItem: React.FC<{
   item: CommentItem;
   postId: number;
-  depth: number;
-  setSelectedReply?: (item: CommentItem) => void;
-}> = ({ item, postId, depth, setSelectedReply }) => {
+  onUpdateItem: (childrenIndex: number, operate: 1 | 2) => void;
+}> = ({ item, postId, onUpdateItem }) => {
   const { parentInfo, setParentInfo } = useCommentContext() || {};
   const [messageApi, contextHolder] = message.useMessage();
   console.log(item, "++??item");
 
-  const handleOperateLike = async (item: CommentItem) => {
+  const handleOperateLike = async (item: CommentItem, index: number) => {
     try {
       if (item.isLike) {
         const res = await _$fetch.post<any>("apiv1/comment/cancelLike", {
@@ -71,6 +70,7 @@ const CommentItem: React.FC<{
         });
         if (res.success) {
           messageApi.success(res.message || "操作成功");
+          onUpdateItem(index, 1);
         } else {
           messageApi.error(res.message || "操作失败");
         }
@@ -83,18 +83,21 @@ const CommentItem: React.FC<{
         });
         if (res.success) {
           messageApi.success(res.message || "操作成功");
+          onUpdateItem(index, 1);
         } else {
           messageApi.error(res.message || "操作失败");
         }
       }
+
+      console.log(item, "++??item");
     } catch (error) {
       console.log(error);
     }
   };
 
-  const handleOperateUnlike = async (item: CommentItem) => {
+  const handleOperateUnlike = async (item: CommentItem, index: number) => {
     try {
-      if (item.unlike) {
+      if (item.isUnLike) {
         const res = await _$fetch.post<any>("apiv1/comment/cancelUnlike", {
           body: {
             commentId: item.id,
@@ -103,6 +106,7 @@ const CommentItem: React.FC<{
         });
         if (res.success) {
           messageApi.success(res.message || "操作成功");
+          onUpdateItem(index, 2);
         } else {
           messageApi.error(res.message || "操作失败");
         }
@@ -115,6 +119,7 @@ const CommentItem: React.FC<{
         });
         if (res.success) {
           messageApi.success(res.message || "操作成功");
+          onUpdateItem(index, 2);
         } else {
           messageApi.error(res.message || "操作失败");
         }
@@ -145,9 +150,6 @@ const CommentItem: React.FC<{
               <span className="font-semibold  text-gray-900">
                 {item?.visitorName || item?.user?.username || "匿名用户"}
               </span>
-              <span className="text-gray-500 space-x-2">
-                {dayjs(item.createdAt).format("YYYY-MM-DD HH:mm:ss")}
-              </span>
             </div>
             <div
               className="flex items-center space-x-2 text-sm text-gray-500 cursor-pointer"
@@ -163,9 +165,46 @@ const CommentItem: React.FC<{
 
           {/* 评论内容 */}
           <p className="mt-1 text-gray-800 break-words">{item.content}</p>
+          <div className="w-full flex justify-center items-center mt-2">
+            <div className="flex-1 flex items-center">
+              <div
+                className="flex items-center space-x-1 text-gray-500 text-sm cursor-pointer"
+                onClick={() => handleOperateLike(item, -1)}
+              >
+                {item.isLike ? (
+                  <img src="/like1-active.png" alt="like" className="h-4 w-4" />
+                ) : (
+                  <img src="/like1.png" alt="like" className="h-4 w-4" />
+                )}
+
+                <span>赞</span>
+              </div>
+              <div
+                className="ml-4 flex items-center space-x-1 text-gray-500 text-sm cursor-pointer"
+                onClick={() => {
+                  handleOperateUnlike(item, -1);
+                }}
+              >
+                {item?.isUnLike ? (
+                  <img
+                    src="/unlike-active.png"
+                    alt="dislike"
+                    className="h-4 w-4"
+                  />
+                ) : (
+                  <img src="/unlike.png" alt="dislike" className="h-4 w-4" />
+                )}
+                <span>踩</span>
+              </div>
+            </div>
+
+            <div className="text-gray-500 space-x-2">
+              {dayjs(item.createdAt).format("YYYY-MM-DD HH:mm:ss")}
+            </div>
+          </div>
         </div>
       </div>
-      {item.children.map((cItem) => {
+      {item.children.map((cItem, childIndex) => {
         return (
           <div className="flex space-x-3 pl-5 py-3 border-b border-gray-100 last:border-0">
             {/* 头像 */}
@@ -185,13 +224,10 @@ const CommentItem: React.FC<{
                   <span className="font-semibold  text-gray-900">
                     {cItem?.visitorName || cItem?.user?.username || "匿名用户"}
                     {cItem.applyUserId
-                      ? `> ${cItem?.applyUser?.username}`
+                      ? ` > ${cItem?.applyUser?.username}`
                       : cItem.tempApplyUserName
                       ? ` > ${cItem.tempApplyUserName}`
                       : ""}
-                  </span>
-                  <span className="text-gray-500 space-x-2">
-                    {dayjs(cItem.createdAt).format("YYYY-MM-DD HH:mm:ss")}
                   </span>
                 </div>
                 <div
@@ -209,39 +245,49 @@ const CommentItem: React.FC<{
               {/* 评论内容 */}
               <p className="mt-1 text-gray-800 break-words">{cItem.content}</p>
 
-              <div className="w-full flex items-center space-x-4 mt-2">
-                <div
-                  className="flex items-center space-x-1 text-gray-500 text-sm cursor-pointer"
-                  onClick={() => handleOperateLike(cItem)}
-                >
-                  {cItem.isLike ? (
-                    <img
-                      src="/like1-active.png"
-                      alt="like"
-                      className="h-4 w-4"
-                    />
-                  ) : (
-                    <img src="/like1.png" alt="like" className="h-4 w-4" />
-                  )}
+              <div className="w-full flex justify-center items-center mt-2">
+                <div className="flex-1 flex items-center">
+                  <div
+                    className="flex items-center space-x-1 text-gray-500 text-sm cursor-pointer"
+                    onClick={() => handleOperateLike(cItem, childIndex)}
+                  >
+                    {cItem.isLike ? (
+                      <img
+                        src="/like1-active.png"
+                        alt="like"
+                        className="h-4 w-4"
+                      />
+                    ) : (
+                      <img src="/like1.png" alt="like" className="h-4 w-4" />
+                    )}
 
-                  <span>赞</span>
+                    <span>赞</span>
+                  </div>
+                  <div
+                    className="ml-4 flex items-center space-x-1 text-gray-500 text-sm cursor-pointer"
+                    onClick={() => {
+                      handleOperateUnlike(cItem, childIndex);
+                    }}
+                  >
+                    {cItem?.isUnLike ? (
+                      <img
+                        src="/unlike-active.png"
+                        alt="dislike"
+                        className="h-4 w-4"
+                      />
+                    ) : (
+                      <img
+                        src="/unlike.png"
+                        alt="dislike"
+                        className="h-4 w-4"
+                      />
+                    )}
+                    <span>踩</span>
+                  </div>
                 </div>
-                <div
-                  className="flex items-center space-x-1 text-gray-500 text-sm cursor-pointer"
-                  onClick={() => {
-                    handleOperateUnlike(item);
-                  }}
-                >
-                  {item?.unlike ? (
-                    <img
-                      src="/unlike-active.png"
-                      alt="dislike"
-                      className="h-4 w-4"
-                    />
-                  ) : (
-                    <img src="/unlike.png" alt="dislike" className="h-4 w-4" />
-                  )}
-                  <span>踩</span>
+
+                <div className="text-gray-500 space-x-2">
+                  {dayjs(cItem.createdAt).format("YYYY-MM-DD HH:mm:ss")}
                 </div>
               </div>
             </div>
@@ -268,9 +314,6 @@ const CommentItem: React.FC<{
             <span className="font-semibold  text-gray-900">
               {item?.visitorName || item?.user?.username || "匿名用户"}
             </span>
-            <span className="text-gray-500 space-x-2">
-              {dayjs(item.createdAt).format("YYYY-MM-DD HH:mm:ss")}
-            </span>
           </div>
           <div
             className="flex items-center space-x-2 text-sm text-gray-500 cursor-pointer"
@@ -287,22 +330,41 @@ const CommentItem: React.FC<{
         {/* 评论内容 */}
         <p className="mt-1 text-gray-800 break-words">{item.content}</p>
 
-        <div className="w-full flex items-center space-x-4 mt-2">
-          <div
-            className="flex items-center space-x-1 text-gray-500 text-sm cursor-pointer"
-            onClick={() => handleOperateLike(item)}
-          >
-            <img src="/like1.png" alt="like" className="h-4 w-4" />
-            <span>赞</span>
+        <div className="w-full flex flex-between items-center mt-2">
+          <div className="flex-1 flex items-center">
+            <div
+              className="flex items-center space-x-1 text-gray-500 text-sm cursor-pointer"
+              onClick={() => handleOperateLike(item, -1)}
+            >
+              {item.isLike ? (
+                <img src="/like1-active.png" alt="like" className="h-4 w-4" />
+              ) : (
+                <img src="/like1.png" alt="like" className="h-4 w-4" />
+              )}
+
+              <span>赞</span>
+            </div>
+            <div
+              className="ml-4 flex items-center space-x-1 text-gray-500 text-sm cursor-pointer"
+              onClick={() => {
+                handleOperateUnlike(item, -1);
+              }}
+            >
+              {item?.isUnLike ? (
+                <img
+                  src="/unlike-active.png"
+                  alt="dislike"
+                  className="h-4 w-4"
+                />
+              ) : (
+                <img src="/unlike.png" alt="dislike" className="h-4 w-4" />
+              )}
+              <span>踩</span>
+            </div>
           </div>
-          <div
-            className="flex items-center space-x-1 text-gray-500 text-sm cursor-pointer"
-            onClick={() => {
-              handleOperateUnlike(item);
-            }}
-          >
-            <img src="/unlike.png" alt="dislike" className="h-4 w-4" />
-            <span>踩</span>
+
+          <div className="text-gray-500 space-x-2">
+            {dayjs(item.createdAt).format("YYYY-MM-DD HH:mm:ss")}
           </div>
         </div>
       </div>
@@ -330,13 +392,31 @@ const CommentListWidget = ({ postId }: { postId: number }) => {
   return (
     <div className="p-2">
       <div className="p-2 bg-white rounded-lg shadow-sm divide-y divide-gray-100">
-        {list?.map((c: any) => (
+        {list?.map((c: any, index: number) => (
           <CommentItem
+            onUpdateItem={(childIndex: number, operate) => {
+              console.log(childIndex, "++??index");
+              const tempList = JSON.parse(JSON.stringify(list));
+              if (childIndex == -1) {
+                if (operate == 1) {
+                  tempList[index].isLike = !tempList[index].isLike;
+                } else {
+                  tempList[index].isUnLike = !tempList[index].isUnLike;
+                }
+              } else {
+                if (operate == 1) {
+                  tempList[index].children[childIndex].isLike =
+                    !tempList[index].children[childIndex].isLike;
+                } else {
+                  tempList[index].children[childIndex].isUnLike =
+                    !tempList[index].children[childIndex].isUnLike;
+                }
+              }
+              setList(tempList);
+            }}
             postId={postId}
-            setSelectedReply={setSelectedReply}
             key={c.id}
             item={c}
-            depth={0}
           />
         ))}
       </div>

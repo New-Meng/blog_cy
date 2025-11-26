@@ -72,7 +72,7 @@ const postView = async ({ searchParams }: searchEnterParams) => {
                 {detail?.title}
               </div>
 
-              {detail?.content && (
+              {detail?.content ? (
                 <div className="mt-2 px-2 py-3 rounded-sm bg-white">
                   <CustomEditor
                     readonly={true}
@@ -80,9 +80,14 @@ const postView = async ({ searchParams }: searchEnterParams) => {
                     options={{ minHeight: "500px" }}
                   ></CustomEditor>
                 </div>
+              ) : (
+                <div className="mt-2 px-2 py-3 rounded-sm bg-white">
+                  暂无内容
+                </div>
               )}
             </div>
 
+            {/* 评论列表和发表组件 */}
             <CommentProvider>
               <CommentListWidget postId={postId}></CommentListWidget>
 

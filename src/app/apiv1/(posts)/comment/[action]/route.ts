@@ -165,9 +165,10 @@ export const POST = async (
           () =>
             Promise.resolve({
               id: comment.id,
-              content: comment.content,
               createdAt: comment.createdAt,
+              updatedAt: comment.updatedAt,
               visitorName: comment.visitorName,
+              userId: comment.userId,
             }),
           "评论创建成功"
         );
@@ -405,14 +406,15 @@ export const POST = async (
                 commentId: body.commentId,
               },
             });
+            if (findData?.like) {
+              return {
+                message: "赞和踩不能同时操作",
+                code: 500,
+              };
+            }
             if (findData?.unlike) {
               return {
                 message: "不能重复操作点踩",
-                code: 500,
-              };
-            } else if (findData?.like) {
-              return {
-                message: "赞和踩不能同时操作",
                 code: 500,
               };
             }
@@ -424,7 +426,7 @@ export const POST = async (
               },
               data: {
                 unlike: {
-                  decrement: 1,
+                  increment: 1,
                 },
               },
             });
@@ -507,8 +509,8 @@ export const POST = async (
                   deletedAt: null,
                 },
                 data: {
-                  like: {
-                    increment: 1,
+                  unlike: {
+                    decrement: 1,
                   },
                 },
               });
