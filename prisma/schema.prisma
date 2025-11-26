@@ -60,12 +60,15 @@ model User {
   /// 用户收藏的文章信息，存id
   likes Like[] @relation("UserLikes")
 
+  commentLikes CommentLike[] @relation("CommentLikesUsers")
+
   /// 用户的收藏文章
   favorites Favorite[] @relation("UserFavorites")
 
   comment Comment[] @relation("UserComments")
 
-  commentApplyUser Comment[] @relation("CommentApplyUser")
+  commentApplyUser Comment[]    @relation("CommentApplyUser")
+  unLikePosts      unLikePost[] @relation("UserUnLikes")
 
   /// 索引字段
   @@index([email])
@@ -98,7 +101,8 @@ model Post {
   // postTags      PostTag[]
   // postTags      PostTag[]
 
-  comments Comment[] @relation("PostComments")
+  comments    Comment[]    @relation("PostComments")
+  unLikePosts unLikePost[] @relation("PostUnLikes")
 
   /// 添加索引，方便查找时过滤
   @@index([deletedAt])
@@ -129,6 +133,7 @@ model PostTag {
   @@unique([postId, tagId])
 }
 
+// 文章点赞表
 model Like {
   id Int @id @default(autoincrement())
 
@@ -147,6 +152,24 @@ model Like {
   @@unique([userId, postId])
 }
 
+// 文章点踩表
+model unLikePost {
+  id     Int  @id @default(autoincrement())
+  /// 关联关系，Post表 的 id 和  postId 字段关联，关联关系是  PostLikes 是一对多的关系 一个文章，可以有多个点赞
+  post   Post @relation(fields: [postId], references: [id], name: "PostUnLikes")
+  postId Int
+
+  /// 关联 user表 一个喜欢，对应一个user
+  user   User @relation(fields: [userId], references: [id], name: "UserUnLikes")
+  userId Int
+
+  unlikeAt DateTime @default(now())
+
+  /// 防止重复点赞 一个用户，只能点踩一次
+  @@unique([userId, postId])
+}
+
+// 文章收藏表
 model Favorite {
   id        Int      @id @default(autoincrement())
   user      User     @relation(fields: [userId], references: [id], name: "UserFavorites")
@@ -171,8 +194,8 @@ model Comment {
   visitorName  String /// 评论者姓名
   visitorEmail String /// 评论者邮箱
 
-  applyUser   User? @relation(fields: [applyUserId], references: [id], name: "CommentApplyUser")
-  applyUserId Int? /// 关联申请id
+  applyUser         User?   @relation(fields: [applyUserId], references: [id], name: "CommentApplyUser")
+  applyUserId       Int? /// 关联申请id
   tempApplyUserName String? /// 临时申请用户名
 
   content   String    @db.Text /// 评论内容
@@ -182,10 +205,28 @@ model Comment {
   ipAddress String    @db.Text /// 评论者ip地址
   userAgent String    @db.Text // 请求头信息
 
-  link   String? /// 评论点赞数量
-  unLink String? /// 评论点踩数量
+  /// 掉进陷阱了，，如果like 加上? 则模式值不生效
+  like         Int           @default(0) /// 评论点赞数量
+  unlike       Int           @default(0) /// 评论点踩数量
+  likeAt       DateTime?     @default(now()) /// 评论点赞时间
+  unlikeAT     DateTime?     @default(now()) /// 评论点踩时间
+  commentLikes CommentLike[] @relation("CommentLikes")
 
   @@index([postId, status, createdAt])
   @@index([parentId, createdAt])
+  @@index(userId) // 用户查询用户是都点过赞，整个索引
   @@map("comment") // 映射数据库中，实际表名称
+}
+
+// 中间表，记录用户点赞的数据 不喜欢的数据，也在这里面存
+model CommentLike {
+  id        Int      @id @default(autoincrement())
+  comment   Comment  @relation(fields: [commentId], references: [id], name: "CommentLikes")
+  commentId Int
+  // 评论点赞中间表
+  user      User     @relation(fields: [userId], references: [id], name: "CommentLikesUsers")
+  userId    Int
+  like      Boolean  @default(false)
+  unlike    Boolean  @default(false)
+  createdAt DateTime @default(now())
 }

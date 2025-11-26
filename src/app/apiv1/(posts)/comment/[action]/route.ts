@@ -101,6 +101,21 @@ interface CreateCommentDto {
   rootId?: number;
   visitorName: string;
   visitorEmail: string;
+
+  applyUserId?: number;
+  tempApplyUserName?: string;
+}
+
+interface LikeCommentDto {
+  postId: number;
+  commentId: number;
+  like?: boolean;
+  unlike?: boolean;
+}
+
+interface UnlikeCommentDto {
+  postId: number;
+  commentId: number;
 }
 
 export const POST = async (
@@ -134,6 +149,10 @@ export const POST = async (
             rootId: body.rootId ? Number(body.rootId) : undefined,
             visitorName: body.visitorName.trim(),
             visitorEmail: body.visitorEmail.trim(),
+            applyUserId: body.applyUserId
+              ? Number(body.applyUserId)
+              : undefined,
+            tempApplyUserName: body.tempApplyUserName?.trim(),
             ipAddress:
               request.headers.get("x-forwarded-for") ||
               request.headers.get("x-real-ip") ||
@@ -211,6 +230,315 @@ export const POST = async (
       }
     }
 
+    case "like": {
+      // 点赞和取消点赞，必须登录
+      if (!validateRes.success) {
+        return withApiHandler(() => Promise.reject(validateRes.data), "", {
+          code: validateRes.code,
+        });
+      } else {
+        const validateBody = await validateRequestBody(request);
+        if (!validateBody.success) {
+          return withApiHandler(() => Promise.reject(validateBody.message));
+        }
+        const body: LikeCommentDto = validateBody.body;
+        const trasctjionResult = await prisma.$transaction(async (tx) => {
+          try {
+            const findData = await tx.commentLike.findFirst({
+              where: {
+                userId: validateRes.data.userId,
+                commentId: body.commentId,
+              },
+            });
+            if (findData?.like) {
+              return {
+                message: "您已点赞过该评论",
+                code: 500,
+              };
+            } else if (findData?.unlike) {
+              return {
+                message: "赞和踩不能同时操作",
+                code: 500,
+              };
+            }
+            const res9 = await tx.comment.updateMany({
+              where: {
+                id: body.commentId,
+                postId: body.postId,
+                deletedAt: null,
+              },
+              data: {
+                like: {
+                  increment: 1,
+                },
+              },
+            });
+            console.log(res9, "++??res9");
+            if (findData?.id) {
+              await tx.commentLike.updateMany({
+                where: {
+                  id: findData.id,
+                },
+                data: {
+                  like: true,
+                },
+              });
+            } else {
+              await tx.commentLike.create({
+                data: {
+                  userId: validateRes.data.userId,
+                  commentId: body.commentId,
+                  like: true,
+                  unlike: false,
+                },
+              });
+            }
+
+            return {
+              code: 200,
+              message: "点赞成功",
+            };
+          } catch (error) {
+            return {
+              message: "未知事务错误",
+              code: 500,
+            };
+          }
+        });
+
+        if (trasctjionResult.code == 200) {
+          return withApiHandler(() => Promise.resolve(null), "点赞成功");
+        } else {
+          return withApiHandler(
+            () => Promise.reject(trasctjionResult.message),
+            "",
+            {
+              code: trasctjionResult.code,
+            }
+          );
+        }
+      }
+    }
+
+    case "cancelLike": {
+      if (!validateRes.success) {
+        return withApiHandler(() => Promise.reject(validateRes.data), "", {
+          code: validateRes.code,
+        });
+      } else {
+        try {
+          const validateBody = await validateRequestBody(request);
+          if (!validateBody.success) {
+            return withApiHandler(() => Promise.reject(validateBody.message));
+          }
+          const body: LikeCommentDto = validateBody.body;
+          const trasctjionResult = await prisma.$transaction(async (tx) => {
+            try {
+              const findData = await tx.commentLike.findFirst({
+                where: {
+                  userId: validateRes.data.userId,
+                  commentId: body.commentId,
+                },
+              });
+              if (!findData || !findData.like) {
+                return {
+                  message: "您尚未点赞该评论",
+                  code: 500,
+                };
+              }
+              await tx.comment.updateMany({
+                where: {
+                  id: body.commentId,
+                  postId: body.postId,
+                  deletedAt: null,
+                },
+                data: {
+                  like: {
+                    decrement: 1,
+                  },
+                },
+              });
+              await tx.commentLike.updateMany({
+                where: {
+                  id: findData.id,
+                },
+                data: {
+                  like: false,
+                },
+              });
+              return {
+                code: 200,
+                message: "取消点赞成功",
+              };
+            } catch (error) {
+              return {
+                message: "未知事务错误",
+                code: 500,
+              };
+            }
+          });
+
+          if (trasctjionResult.code == 200) {
+            return withApiHandler(() => Promise.resolve(null), "取消点赞成功");
+          }
+        } catch (error) {}
+      }
+    }
+
+    case "unlike": {
+      // 点踩
+      if (!validateRes.success) {
+        return withApiHandler(() => Promise.reject(validateRes.data), "", {
+          code: validateRes.code,
+        });
+      } else {
+        const validateBody = await validateRequestBody(request);
+        if (!validateBody.success) {
+          return withApiHandler(() => Promise.reject(validateBody.message));
+        }
+        const body: UnlikeCommentDto = validateBody.body;
+        const trasctjionResult = await prisma.$transaction(async (tx) => {
+          try {
+            const findData = await tx.commentLike.findFirst({
+              where: {
+                userId: validateRes.data.userId,
+                commentId: body.commentId,
+              },
+            });
+            if (findData?.unlike) {
+              return {
+                message: "不能重复操作点踩",
+                code: 500,
+              };
+            } else if (findData?.like) {
+              return {
+                message: "赞和踩不能同时操作",
+                code: 500,
+              };
+            }
+            const dbRes = await tx.comment.updateMany({
+              where: {
+                id: body.commentId,
+                postId: body.postId,
+                deletedAt: null,
+              },
+              data: {
+                unlike: {
+                  decrement: 1,
+                },
+              },
+            });
+            if (findData?.id) {
+              await tx.commentLike.updateMany({
+                where: {
+                  id: findData.id,
+                },
+                data: {
+                  unlike: true,
+                },
+              });
+            } else {
+              await tx.commentLike.create({
+                data: {
+                  userId: validateRes.data.userId,
+                  commentId: body.commentId,
+                  like: false,
+                  unlike: true,
+                },
+              });
+            }
+
+            return {
+              code: 200,
+              message: "点踩成功",
+            };
+          } catch (error) {
+            return {
+              message: "未知事务错误",
+              code: 500,
+            };
+          }
+        });
+
+        if (trasctjionResult.code == 200) {
+          return withApiHandler(() => Promise.resolve(null), "点踩成功");
+        } else {
+          return withApiHandler(
+            () => Promise.reject(trasctjionResult.message),
+            "",
+            {
+              code: trasctjionResult.code,
+            }
+          );
+        }
+      }
+    }
+
+    case "cancelUnlike": {
+      if (!validateRes.success) {
+        return withApiHandler(() => Promise.reject(validateRes.data), "", {
+          code: validateRes.code,
+        });
+      } else {
+        try {
+          const validateBody = await validateRequestBody(request);
+          if (!validateBody.success) {
+            return withApiHandler(() => Promise.reject(validateBody.message));
+          }
+          const body: UnlikeCommentDto = validateBody.body;
+          const trasctjionResult = await prisma.$transaction(async (tx) => {
+            try {
+              const findData = await tx.commentLike.findFirst({
+                where: {
+                  userId: validateRes.data.userId,
+                  commentId: body.commentId,
+                },
+              });
+              if (!findData || !findData.unlike) {
+                return {
+                  message: "您尚未点踩该评论",
+                  code: 500,
+                };
+              }
+              await tx.comment.updateMany({
+                where: {
+                  id: body.commentId,
+                  postId: body.postId,
+                  deletedAt: null,
+                },
+                data: {
+                  like: {
+                    increment: 1,
+                  },
+                },
+              });
+              await tx.commentLike.updateMany({
+                where: {
+                  id: findData.id,
+                },
+                data: {
+                  unlike: false,
+                },
+              });
+              return {
+                code: 200,
+                message: "取消点踩成功",
+              };
+            } catch (error) {
+              return {
+                message: "未知事务错误",
+                code: 500,
+              };
+            }
+          });
+
+          if (trasctjionResult.code == 200) {
+            return withApiHandler(() => Promise.resolve(null), "取消点踩成功");
+          }
+        } catch (error) {}
+      }
+    }
+
     default:
       return withApiHandler(() => Promise.reject("Not Found"));
   }
@@ -224,6 +552,12 @@ export const GET = async (
 
   switch (action) {
     case "get": {
+      const validateRes = await verifyToken(request);
+      let userId: number | undefined = undefined;
+
+      if (validateRes.code === 200) {
+        userId = validateRes.data.userId;
+      }
       const url = new URL(request.url);
       let postId = Number(url.searchParams.get("postId"));
 
@@ -233,6 +567,7 @@ export const GET = async (
         const dbRes = await prisma.comment.findMany({
           where: {
             postId: postId,
+            deletedAt: null,
           },
           // 指定返回字段，和 join user 返回字段
           select: {
@@ -243,6 +578,15 @@ export const GET = async (
             createdAt: true,
             visitorName: true,
             visitorEmail: true,
+            tempApplyUserName: true, // 匿名用户评论
+            applyUserId: true,
+            applyUser: {
+              select: {
+                id: true,
+                username: true,
+                avatar: true,
+              },
+            },
 
             user: {
               select: {
@@ -252,15 +596,42 @@ export const GET = async (
                 // 不包含 email 等敏感信息
               },
             },
+            commentLikes: userId
+              ? {
+                  where: {
+                    userId: userId,
+                  },
+                  select: {
+                    like: true,
+                    unlike: true,
+                    id: true,
+                  },
+                }
+              : undefined,
           },
           orderBy: {
             createdAt: "asc", // 按创建时间排序，确保子评论在父评论之后
           },
         });
 
-        const resultList = listToDeepTree(dbRes);
+        const commentsWithLikeStatus = dbRes.map((comment) => {
+          const { commentLikes, ...rest } = comment;
+          let isUnLike = false;
+          let isLike = false;
+          if (commentLikes && commentLikes.length > 0) {
+            isUnLike = commentLikes[0].unlike;
+            isLike = commentLikes[0].like;
+          }
+          return {
+            ...rest,
+            isUnLike,
+            isLike,
+          };
+        });
+
+        const resultList = listToDeepTree(commentsWithLikeStatus);
         console.log(resultList, "++??kk");
-        return withApiHandler(() => Promise.resolve(resultList || []));
+        return withApiHandler(() => Promise.resolve(resultList || []), "成功");
       }
     }
 
