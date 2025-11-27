@@ -96,9 +96,10 @@ input::placeholder {
   background-image: linear-gradient(#2a2a2a, #1a1a1a);
 }
 
+/* 左 - 右 滑动 */
 @keyframes fade-in-left {
   from {
-    transform: translateX(-12px);
+    transform: translateX(-20px);
     opacity: 0;
   }
   to {
@@ -108,5 +109,5 @@ input::placeholder {
 }
 
 @utility fade-in-left {
-  animation: fade-in-left 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+  animation: fade-in-left 0.65s cubic-bezier(0, 0, 0.58, 1) both;
 }

@@ -69,7 +69,7 @@ const CustomComment = ({ postId }: CommentPropsType) => {
   return (
     <>
       {contextHolder}
-      <div className="px-2 w-full box-border p-2">
+      <div className="px-2 w-full box-border">
         <div className="p-3 bg-white rounded-sm">
           <div className="flex justify-start items-start h-[25px] text-sm px-3">
             <div className="mr-2">

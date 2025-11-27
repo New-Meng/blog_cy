@@ -4,6 +4,7 @@ import MobileSearchInput from "./CommonSearchInput";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { HOME_PAGE } from "@/app/lib/constant";
 
 const CommonTitleBar: React.FC = () => {
   const router = useRouter();
@@ -22,7 +23,8 @@ const CommonTitleBar: React.FC = () => {
   const handleSearch = (val: string) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set("title", val);
-    router.push(`${pathname}?${params.toString()}`);
+    console.log(`${HOME_PAGE}?${params.toString()}`, "++??url");
+    router.push(`${HOME_PAGE}?${params.toString()}`);
   };
 
   useEffect(() => {

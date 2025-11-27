@@ -58,7 +58,7 @@ model User {
   posts         Post[] ///用户发表的文章
 
   /// 用户收藏的文章信息，存id
-  likes Like[] @relation("UserLikes")
+  likes LikePost[] @relation("UserLikes")
 
   commentLikes CommentLike[] @relation("CommentLikesUsers")
 
@@ -92,7 +92,7 @@ model Post {
   authorId Int
 
   /// 点赞功能
-  likes         Like[]     @relation("PostLikes")
+  likes         LikePost[]     @relation("PostLikes")
   likeCount     Int        @default(0)
   favorites     Favorite[] @relation("PostFavorites")
   favoriteCount Int        @default(0)
@@ -134,7 +134,7 @@ model PostTag {
 }
 
 // 文章点赞表
-model Like {
+model LikePost {
   id Int @id @default(autoincrement())
 
   /// 关联关系，Post表 的 id 和  postId 字段关联，关联关系是  PostLikes 是一对多的关系 一个文章，可以有多个点赞
@@ -146,7 +146,8 @@ model Like {
   userId Int
 
   // 额外字段：点赞时间
-  likedAt DateTime @default(now())
+  likedAt   DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   /// 防止重复点赞 一个用户，只能点赞一次
   @@unique([userId, postId])
@@ -163,7 +164,8 @@ model unLikePost {
   user   User @relation(fields: [userId], references: [id], name: "UserUnLikes")
   userId Int
 
-  unlikeAt DateTime @default(now())
+  unlikeAt  DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   /// 防止重复点赞 一个用户，只能点踩一次
   @@unique([userId, postId])
@@ -176,7 +178,9 @@ model Favorite {
   userId    Int
   post      Post     @relation(fields: [postId], references: [id], name: "PostFavorites")
   postId    Int
+  favorited Boolean  @default(false) /// 是否喜欢
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 // 评论模型

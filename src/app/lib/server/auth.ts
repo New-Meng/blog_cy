@@ -15,10 +15,15 @@ export interface VerifyTokenInterface {
  * @returns 验证成功返回 decoded payload，失败返回 null
  */
 export const verifyToken = async (
-  req: NextRequest
+  req: NextRequest | string
 ): Promise<VerifyTokenInterface> => {
   // 从 cookie中获取 token
-  let token = req.cookies.get("Authorization")?.value;
+  let token
+  if (typeof req === "string") {
+    token = req;
+  } else {
+    token = req.cookies.get("Authorization")?.value
+  }
 
   console.log(token, "++??token");
 
