@@ -92,7 +92,7 @@ model Post {
   authorId Int
 
   /// 点赞功能
-  likes         LikePost[]     @relation("PostLikes")
+  likes         LikePost[] @relation("PostLikes")
   likeCount     Int        @default(0)
   favorites     Favorite[] @relation("PostFavorites")
   favoriteCount Int        @default(0)
@@ -110,10 +110,13 @@ model Post {
 
 model Tag {
   id       Int       @id @default(autoincrement())
-  tagName  String    @db.VarChar(10)
+  tagName  String    @db.VarChar(50)
   postTags PostTag[] /// 显示关系指定
   /// posts    Post[]    @relation("PostTag") /// 隐式关系，中间表由 prisma 自动创建
   // postTags PostTag[]
+
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
 
   @@index([tagName])
 }

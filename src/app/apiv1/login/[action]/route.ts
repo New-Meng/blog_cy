@@ -56,6 +56,7 @@ export const POST = async (
             userId: dbRes.id,
             email: dbRes.email,
             username: dbRes.username,
+            role: dbRes.role,
           })
             .setProtectedHeader({ alg: "HS256" })
             .setIssuedAt(Date.now())

@@ -6,11 +6,26 @@ import { AsyncButton } from "@/components/client/AsyncButton";
 
 import Form from "antd/es/form";
 import { _$fetch } from "@/app/lib/client/fetch";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import CustomEditor from "../../components/CustomEditor";
 import { useRouter } from "next/navigation";
-import { ConfigProvider } from "antd";
+import { ConfigProvider, Select } from "antd";
 import { extractFirstTwoParagraphs } from "@/app/lib/client/clientType";
+import { Tag } from "@prisma/client";
+
+interface TagListResponseData {
+  list: Tag[];
+  total: number;
+  pageNo: number;
+  pageSize: number;
+}
+
+interface FormDataType {
+  title: string;
+  content: string;
+  previewContent: string;
+  tagIds: number[];
+}
 
 const Input = dynamic(() =>
   import("antd/es/input").then((mod) => {
@@ -27,9 +42,29 @@ const Switch = dynamic(() =>
 const CreatePostPage = () => {
   const [form] = Form.useForm();
   const router = useRouter();
+  const [tagOptions, setTagOptions] = useState<
+    {
+      label: string;
+      value: number;
+    }[]
+  >([]);
+
+  const getTagList = async () => {
+    const res = await _$fetch.get<TagListResponseData>("apiv1/admin/tag/list");
+    if (res.success) {
+      if (res.data.list && res.data.list.length) {
+        setTagOptions(
+          res.data.list.map((item) => ({
+            label: item.tagName,
+            value: item.id,
+          }))
+        );
+      }
+    }
+  };
 
   const handlePublish = async () => {
-    const formData = form.getFieldsValue();
+    const formData: FormDataType = form.getFieldsValue();
     let params = {
       ...formData,
     };
@@ -52,6 +87,10 @@ const CreatePostPage = () => {
       message.error(res.message);
     }
   };
+
+  useEffect(() => {
+    getTagList();
+  }, []);
 
   return (
     <ConfigProvider
@@ -83,6 +122,10 @@ const CreatePostPage = () => {
 
             <Form.Item label="是否公开" name="published">
               <Switch></Switch>
+            </Form.Item>
+
+            <Form.Item label="文章标签" name="tagIds">
+              <Select mode="multiple" options={tagOptions}></Select>
             </Form.Item>
 
             <Form.Item

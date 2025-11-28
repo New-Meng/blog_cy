@@ -56,10 +56,6 @@ body {
   }
 }
 
-.ant-popover-inner {
-  padding: 0 !important;
-}
-
 .ant-btn-loading-icon {
   display: flex;
   justify-content: center;

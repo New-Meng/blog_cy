@@ -1,4 +1,7 @@
-import { withApiHandler } from "@/app/lib/server/api-handler";
+import {
+  validateRequestBody,
+  withApiHandler,
+} from "@/app/lib/server/api-handler";
 import { verifyToken } from "@/app/lib/server/auth";
 import prisma from "@/app/lib/server/db";
 import { NextRequest, NextResponse } from "next/server";
@@ -121,6 +124,14 @@ export const GET = async (
   }
 };
 
+type CreatePostReqBodyType = {
+  acticleTitle: string;
+  content: string;
+  published: boolean;
+  previewContent: string;
+  tagIds?: string[];
+};
+
 export const POST = async (
   request: NextRequest,
   { params }: { params: { action: string } }
@@ -129,34 +140,92 @@ export const POST = async (
 
   switch (action) {
     case "createpost": {
-      const body = await request.json();
-      const jwtValidate = await verifyToken(request);
-      if (jwtValidate.code !== 200) {
-        return withApiHandler(() => Promise.reject(jwtValidate.data), "", {
-          code: jwtValidate.code,
-        });
+      const bodyRes = await validateRequestBody(request);
+      if (!bodyRes.success) {
+        return withApiHandler(() => Promise.reject(), bodyRes.message);
       } else {
-        let userId = jwtValidate.data.userId;
-        console.log(body, userId, "++??body");
-        try {
-          await prisma.post.create({
-            data: {
-              title: body.acticleTitle,
-              content: body.content,
-              published: body.published,
-              authorId: userId,
-              previewContent: body.previewContent,
-            },
+        const body: CreatePostReqBodyType = bodyRes.body;
+        const jwtValidate = await verifyToken(request);
+        if (jwtValidate.code !== 200) {
+          return withApiHandler(() => Promise.reject(jwtValidate.data), "", {
+            code: jwtValidate.code,
           });
+        } else {
+          let userId = jwtValidate.data.userId;
+          console.log(body, userId, "++??body");
+          try {
+            const transactionRes = await prisma.$transaction(async (tx) => {
+              try {
+                // 创建文章 + 写入关联标签，一个错误，都回滚
+                const resPustPost = await tx.post.create({
+                  data: {
+                    title: body.acticleTitle,
+                    content: body.content,
+                    published: body.published,
+                    authorId: userId,
+                    previewContent: body.previewContent,
+                  },
+                });
+                if (resPustPost.id) {
+                  if (body?.tagIds) {
+                    const createPostTag = await tx.postTag.createMany({
+                      data: body?.tagIds?.map((tagId) => {
+                        return {
+                          tagId: Number(tagId),
+                          postId: resPustPost.id,
+                        };
+                      }),
+                    });
+                    if (createPostTag.count === body?.tagIds?.length) {
+                      return {
+                        success: true,
+                        message: "创建文章成功",
+                        code: 200,
+                      };
+                    } else {
+                      throw new Error("标签关联错误");
+                    }
+                  } else {
+                    return {
+                      success: true,
+                      message: "创建文章成功",
+                      code: 200,
+                    };
+                  }
+                } else {
+                  return {
+                    message: "创建文章失败",
+                    code: 500,
+                    success: false,
+                  };
+                }
+              } catch (error) {
+                return {
+                  message: error || "未知的错误",
+                  code: 500,
+                  success: false,
+                };
+              }
+            });
 
-          return withApiHandler(() => Promise.resolve(null), "成功");
-        } catch (error) {
-          const errorType = prasimaErrorTypeGuard(error);
+            if (transactionRes.success) {
+              return withApiHandler(
+                () => Promise.resolve(null),
+                "创建文章成功"
+              );
+            } else {
+              return withApiHandler(() =>
+                Promise.reject(transactionRes.message || "创建文章失败")
+              );
+            }
+          } catch (error) {
+            const errorType = prasimaErrorTypeGuard(error);
 
-          if (errorType.code !== 0) {
-            return withApiHandler(() => Promise.reject(errorType.message));
-          } else {
-            return withApiHandler(() => Promise.reject("未捕获的错误"));
+            if (errorType.code !== 0) {
+              return withApiHandler(() => Promise.reject(errorType.message));
+            } else {
+              return withApiHandler(() => Promise.reject("未捕获的错误"));
+            }
           }
         }
       }

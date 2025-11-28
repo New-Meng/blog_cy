@@ -51,7 +51,7 @@ const CommonPostsContent = async ({
   let isSeverError = false;
   try {
     const res = await _$fetch.get<ListResponseType>(
-      `apiv1/blogs/list?pageNo=${pageNo}&title=${title}&tag=${tag}`
+      `/apiv1/blogs/list?pageNo=${pageNo}&title=${title}&tag=${tag}`
     );
     console.log(res.data, "++??list");
     list = res.data.list || [];
