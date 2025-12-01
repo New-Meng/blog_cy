@@ -6,6 +6,18 @@ import {
 import { NextRequest } from "next/server";
 import { verifyToken } from "@/app/lib/server/auth";
 
+type PrismaWhereObjType = {
+  title?: {
+    contains: string;
+    // mode: "insensitive";
+  };
+  postTags?: {
+    some: {
+      tagId: number;
+    };
+  };
+};
+
 export const GET = async (
   request: NextRequest,
   { params }: { params: Promise<{ action: string }> }
@@ -17,43 +29,99 @@ export const GET = async (
       const url = new URL(request.url);
       const pageNo = Number(url.searchParams.get("pageNo") || 1);
       const title = url.searchParams.get("title") || "";
-      const tag = url.searchParams.get("type") || "";
+      const tagId = Number(url.searchParams.get("tag") || -1);
       let pageSize = Number(url.searchParams.get("pageSize")) || 10;
       if (pageSize > 10) {
         pageSize = 10;
       }
       console.log(pageNo, pageSize, "++??pagination");
 
-      const PasimaWhereObj = title
-        ? {
-            title: {
-              contains: title, // 类似 SQL 的 LIKE '%关键词%'
-              // mode: "insensitive", // 不区分大小写 报错 可能不存在这个方法
+      const PasimaWhereObj: PrismaWhereObjType = {};
+
+      if (title) {
+        PasimaWhereObj.title = {
+          contains: title, // 类似 SQL 的 LIKE '%关键词%'
+          // mode: "insensitive", // 不区分大小写 报错 可能不存在这个方法
+        };
+      }
+
+      if (tagId != -1) {
+        // 查询包含指定 tagId 的文章
+        PasimaWhereObj.postTags = {
+          some: {
+            tagId: tagId,
+          },
+        };
+      }
+
+      const transactionRes = await prisma.$transaction(async (tx) => {
+        try {
+          const res = await tx.post.findMany({
+            take: pageSize,
+            skip: (pageNo - 1) * pageSize,
+            where: { ...PasimaWhereObj },
+            orderBy: {
+              createdAt: "desc", // 按创建时间降序排列（最新在前）
             },
-          }
-        : {};
+            include: {
+              postTags: {
+                include: {
+                  tag: {
+                    select: {
+                      id: true,
+                      tagName: true,
+                    },
+                  },
+                },
+              },
+            },
+          });
+          const totalPosts = await tx.post.count({
+            where: {
+              ...PasimaWhereObj,
+            },
+          });
+          const transformRes = res.map((item) => {
+            // 解构分离postTags与文章其他属性，避免直接删除导致类型问题
+            const { postTags, ...rest } = item;
 
-      const res = await prisma.post.findMany({
-        take: pageSize,
-        skip: (pageNo - 1) * pageSize,
-        where: { ...PasimaWhereObj },
-        orderBy: {
-          createdAt: "desc", // 按创建时间降序排列（最新在前）
-        },
+            return {
+              ...rest, // 保留文章核心字段
+              tagList: postTags.map((pt) => {
+                return {
+                  id: pt.tag.id, // 取Tag模型的id（语义更准确）
+                  tagName: pt.tag.tagName, // 取Tag模型的标签名
+                };
+              }),
+            };
+          });
+          return {
+            res: transformRes,
+            totalPosts,
+            success: true,
+          };
+        } catch (error) {
+          return {
+            success: false,
+            message: "获取列表失败",
+          };
+        }
       });
-      const totalPosts = await prisma.post.count({
-        where: {
-          ...PasimaWhereObj,
-        },
-      });
-      const returnRes = {
-        list: res,
-        total: totalPosts,
-        pageSize: pageSize,
-        pageNo: pageNo,
-      };
 
-      return withApiHandler(() => Promise.resolve(returnRes), "成功");
+      if (transactionRes.success) {
+        const returnRes = {
+          list: transactionRes.res,
+          total: transactionRes.totalPosts,
+          pageSize: pageSize,
+          pageNo: pageNo,
+        };
+
+        return withApiHandler(() => Promise.resolve(returnRes), "成功");
+      } else {
+        return withApiHandler(() =>
+          Promise.reject(transactionRes.message || "获取列表失败")
+        );
+      }
 
     default:
       return withApiHandler(() => Promise.reject(), "Not Font 404");

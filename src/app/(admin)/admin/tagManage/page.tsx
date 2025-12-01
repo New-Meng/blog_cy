@@ -132,6 +132,8 @@ const TagManagePage = () => {
         setCurrentPage(res.data.pageNo);
         setPageSize(res.data.pageSize);
         setTotal(res.data.total);
+      } else {
+        messageApi.error(res?.message || "获取标签列表失败");
       }
       setTableLoading(false);
     } catch (error) {

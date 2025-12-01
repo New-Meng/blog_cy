@@ -9,6 +9,8 @@ import { _$fetch } from "@/app/lib/client/fetch";
 import { useEffect, useState } from "react";
 import CustomEditor from "../../components/CustomEditor";
 import { useRouter, useSearchParams } from "next/navigation";
+import { Tag } from "@prisma/client";
+import { Select } from "antd";
 
 const Input = dynamic(() =>
   import("antd/es/input").then((mod) => {
@@ -21,10 +23,25 @@ const Switch = dynamic(() =>
     return mod;
   })
 );
+
+interface TagListResponseData {
+  list: Tag[];
+  total: number;
+  pageNo: number;
+  pageSize: number;
+}
+
 const PostEditPage = () => {
   const [form] = Form.useForm();
   const router = useRouter();
   const searchParam = useSearchParams();
+  const [tagOptions, setTagOptions] = useState<
+    {
+      label: string;
+      value: number;
+    }[]
+  >([]);
+
   const postsId = searchParam.get("postId");
 
   const handleEditPublish = async () => {
@@ -58,18 +75,31 @@ const PostEditPage = () => {
     }
   };
 
+  const getTagList = async () => {
+    const res = await _$fetch.get<TagListResponseData>("apiv1/admin/tag/list");
+    if (res.success) {
+      if (res.data.list && res.data.list.length) {
+        setTagOptions(
+          res.data.list.map((item) => ({
+            label: item.tagName,
+            value: item.id,
+          }))
+        );
+      }
+    }
+  };
+
   const content = Form.useWatch("content", form);
 
   useEffect(() => {
     init();
+    getTagList();
   }, []);
 
   return (
     <div className="w-full h-full">
-      <div className="flex justify-end items-center">
-        <AsyncButton className="mb-5" onClick={handleEditPublish}>
-          发布修改
-        </AsyncButton>
+      <div className="my-5 flex justify-end items-center">
+        <AsyncButton onClick={handleEditPublish}>发布修改</AsyncButton>
       </div>
 
       <div className="w-[1200] h-full margin-[0__auto]">
@@ -84,6 +114,10 @@ const PostEditPage = () => {
 
           <Form.Item label="是否公开" name="published">
             <Switch></Switch>
+          </Form.Item>
+
+          <Form.Item label="文章标签" name="tagIds">
+            <Select mode="multiple" options={tagOptions}></Select>
           </Form.Item>
 
           <Form.Item

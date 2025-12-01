@@ -8,6 +8,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 import prasimaErrorTypeGuard from "@/app/lib/server/ErrorTypeGuard";
 import { paginationListResponse } from "@/app/lib/server/responseModel";
+import { DatabaseTwoTone } from "@ant-design/icons";
 
 export const GET = async (
   request: NextRequest,
@@ -95,11 +96,33 @@ export const GET = async (
               id: postsId,
               deletedAt: null,
             },
+            include: {
+              postTags: {
+                select: {
+                  tagId: true,
+                },
+              },
+            },
           });
+
+          let transformRes;
+          if (dbRes?.postTags?.length) {
+            const tagIds = dbRes?.postTags?.map((item) => item.tagId);
+            const { postTags, ...args } = dbRes;
+            transformRes = {
+              ...args,
+              tagIds,
+            };
+          } else {
+            transformRes = {
+              ...dbRes,
+              tagIds: [],
+            };
+          }
           if (!dbRes) {
             return withApiHandler(() => Promise.reject("未查询到对应文章"));
           } else if (dbRes?.authorId === userId) {
-            return withApiHandler(() => Promise.resolve(dbRes), "成功");
+            return withApiHandler(() => Promise.resolve(transformRes), "成功");
           } else {
             return withApiHandler(
               () => Promise.reject(null),
@@ -240,27 +263,80 @@ export const POST = async (
         });
       } else {
         if (body.id && !isNaN(Number(body.id))) {
-          try {
-            await prisma.post.update({
-              where: {
-                id: Number(body.id),
-              },
-              data: {
-                title: body.title,
-                content: body.content,
-                published: body.published,
-              },
-            });
+          const prismaResult = await prisma.$transaction(async (tx) => {
+            // 增量更新
+            try {
+              const postResult = await tx.post.findUnique({
+                where: {
+                  id: Number(body.id),
+                },
+                include: {
+                  postTags: {
+                    select: {
+                      id: true,
+                    },
+                  },
+                },
+              });
+              if (!postResult?.id) {
+                throw new Error("文章不存在");
+              }
 
-            return withApiHandler(() => Promise.resolve(null), "成功");
-          } catch (error) {
-            const errorType = prasimaErrorTypeGuard(error);
+              if (postResult.postTags?.length) {
+                const dataBasTagIds = postResult.postTags.map(
+                  (item) => item.id
+                );
+                const deleteIds = dataBasTagIds.filter(
+                  (item) => !body?.tagIds.includes(item)
+                );
+                const createIds = body?.tagIds?.filter((id: string) => {
+                  return dataBasTagIds.includes(Number(id));
+                });
 
-            if (errorType.code !== 0) {
-              return withApiHandler(() => Promise.reject(errorType.message));
-            } else {
-              return withApiHandler(() => Promise.reject("未捕获的错误"));
+                await tx.postTag.deleteMany({
+                  where: {
+                    id: {
+                      in: deleteIds,
+                    },
+                  },
+                });
+
+                await tx.postTag.createMany({
+                  data: createIds?.map((id: string) => {
+                    return {
+                      tagId: Number(id),
+                      postId: postResult.id,
+                    };
+                  }),
+                });
+              } else {
+                await tx.postTag.createMany({
+                  data: body?.tagIds?.map((id: string) => {
+                    return {
+                      tagId: Number(id),
+                      postId: postResult.id,
+                    };
+                  }),
+                });
+              }
+
+              return {
+                message: "更新文章成功",
+                success: true,
+              };
+            } catch (error) {
+              return {
+                message: typeof error != "string" ? error : "更新文章失败",
+                success: true,
+              };
             }
+          });
+          if (prismaResult.success) {
+            return withApiHandler(() => Promise.resolve(null), "更新文章成功");
+          } else {
+            return withApiHandler(() =>
+              Promise.reject(prismaResult.message || "更新文章失败")
+            );
           }
         } else {
           return withApiHandler(() => Promise.reject("文章id传递错误"));

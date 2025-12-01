@@ -9,10 +9,15 @@ const BlogsPage = async ({
   params,
   searchParams,
 }: {
-  searchParams: { pageNo?: string; title?: string; slug: string[] };
+  searchParams: {
+    pageNo?: string;
+    title?: string;
+    slug: string[];
+    tag?: string;
+  };
   params: { slug: string[] };
 }) => {
-  const tag = params?.slug?.length > 0 ? params.slug[0] : "";
+  const tag = searchParams.tag || "";
   console.log(tag, "++??slug");
   const pageNo = searchParams.pageNo || "1";
   const title = searchParams.title || "";

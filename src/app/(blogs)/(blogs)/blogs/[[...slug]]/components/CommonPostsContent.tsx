@@ -5,6 +5,8 @@ import { marked } from "marked";
 import PaginationWidget from "./PaginationWidget/PaginationWidget";
 import { headers } from "next/headers";
 import CustomEditor from "../../../components/CustomEditor";
+import Link from "next/link";
+import { HOME_PAGE } from "@/app/lib/constant";
 
 type ListItemType = {
   title: string;
@@ -18,6 +20,10 @@ type ListItemType = {
   likeCount: number;
   favoriteCount: number;
   previewContent?: string;
+  tagList?: {
+    id: number;
+    tagName: string;
+  }[];
 };
 
 type ListResponseType = {
@@ -81,6 +87,22 @@ const CommonPostsContent = async ({
                     postId: item.id,
                   }}
                 ></CommonPostTitle>
+              </div>
+
+              <div className="w-full flex justify-between items-center gap-3">
+                <div className="w-full flex justify-start items-center flex-wrap gap-3">
+                  {item.tagList?.map((tag, index) => {
+                    return (
+                      <Link
+                        href={`${HOME_PAGE}?tag=${tag.id}`}
+                        key={tag.id}
+                        className="flex justify-center items-center w-auto h-[23px] px-3 text-[12px] text-[#fff] bg-primas rounded-[5px]"
+                      >
+                        {tag.tagName}
+                      </Link>
+                    );
+                  })}
+                </div>
               </div>
 
               <CustomEditor

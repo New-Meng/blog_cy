@@ -97,9 +97,6 @@ model Post {
   favorites     Favorite[] @relation("PostFavorites")
   favoriteCount Int        @default(0)
   postTags      PostTag[] /// 显示关系指定
-  // tags          Tag[]      @relation("PostTag")
-  // postTags      PostTag[]
-  // postTags      PostTag[]
 
   comments    Comment[]    @relation("PostComments")
   unLikePosts unLikePost[] @relation("PostUnLikes")
