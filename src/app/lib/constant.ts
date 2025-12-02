@@ -3,47 +3,47 @@ export const HOME_PAGE = "/blogs";
 export const MENU_LIST1 = [
   {
     name: "ACG",
-    href: HOME_PAGE + "/ACG",
+    href: HOME_PAGE + "?tag=32",
     noPrefetch: false,
   },
   {
     name: "学习",
-    href: HOME_PAGE + "/Learn",
+    href: HOME_PAGE + "?tag=33",
   },
   {
     name: "软件",
-    href: HOME_PAGE + "/Software",
+    href: HOME_PAGE + "?tag=34",
   },
   {
     name: "游戏",
-    href: HOME_PAGE + "/Game",
+    href: HOME_PAGE + "?tag=35",
   },
   {
     name: "其他",
-    href: HOME_PAGE + "/Other",
+    href: HOME_PAGE + "?tag=36",
   },
 ];
 
 export const MENU_LIST2 = [
   {
     name: "RSS",
-    href: HOME_PAGE + "/RSS",
+    href: HOME_PAGE + "?tag=37",
   },
   {
     name: "Pixiv",
-    href: HOME_PAGE + "/Pixiv",
+    href: HOME_PAGE + "?tag=38",
   },
   {
     name: "AI女友",
-    href: HOME_PAGE + "/AIGril",
+    href: HOME_PAGE + "?tag=39",
   },
   {
     name: "魔法喵",
-    href: HOME_PAGE + "/magicVpn",
+    href: HOME_PAGE + "?tag=40",
   },
   {
     name: "关于",
-    href: HOME_PAGE + "/About",
+    href: "/about",
   },
   {
     name: "登录",

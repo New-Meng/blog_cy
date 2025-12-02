@@ -2,10 +2,14 @@
   "name": "nextjs",
   "version": "0.1.0",
   "private": true,
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  },
   "scripts": {
     "dev": "next dev --turbopack --port 3999",
     "build": "next build",
     "start": "next start --port 3999",
+    "db:seed": "prisma db seed",
     "lint": "next lint",
     "analyze": "cross-env ANALYZE=true npm run build",
     "analyze:dev": "cross-env ANALYZE=true npm run dev"
@@ -38,7 +42,7 @@
     "eslint-config-next": "15.4.6",
     "prisma": "^6.19.0",
     "tailwindcss": "^4",
-    "ts-node": "^10.9.2",
+    "tsx": "^4.21.0",
     "typescript": "^5"
   }
 }
