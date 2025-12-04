@@ -3,43 +3,53 @@ export const HOME_PAGE = "/blogs";
 export const MENU_LIST1 = [
   {
     name: "ACG",
-    href: HOME_PAGE + "?tag=32",
+    // 将原来的 tag=32 提取为对象 id，href 只保留路径，避免 Link 对 pathname 编码导致 %3F
+    href: HOME_PAGE,
+    id: 32,
     noPrefetch: false,
   },
   {
     name: "学习",
-    href: HOME_PAGE + "?tag=33",
+    href: HOME_PAGE,
+    id: 33,
   },
   {
     name: "软件",
-    href: HOME_PAGE + "?tag=34",
+    href: HOME_PAGE,
+    id: 34,
   },
   {
     name: "游戏",
-    href: HOME_PAGE + "?tag=35",
+    href: HOME_PAGE,
+    id: 35,
   },
   {
     name: "其他",
-    href: HOME_PAGE + "?tag=36",
+    href: HOME_PAGE,
+    id: 36,
   },
 ];
 
 export const MENU_LIST2 = [
   {
     name: "RSS",
-    href: HOME_PAGE + "?tag=37",
+    href: HOME_PAGE,
+    id: 37,
   },
   {
     name: "Pixiv",
-    href: HOME_PAGE + "?tag=38",
+    href: HOME_PAGE,
+    id: 38,
   },
   {
     name: "AI女友",
-    href: HOME_PAGE + "?tag=39",
+    href: HOME_PAGE,
+    id: 39,
   },
   {
     name: "魔法喵",
-    href: HOME_PAGE + "?tag=40",
+    href: HOME_PAGE,
+    id: 40,
   },
   {
     name: "关于",
@@ -55,3 +65,5 @@ export const MENU_LIST2 = [
     noPrefetch: true,
   },
 ];
+
+export const GITHUB_URL = "https://github.com/New-Meng";

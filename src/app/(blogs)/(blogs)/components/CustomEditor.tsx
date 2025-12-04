@@ -12,6 +12,9 @@ import {
   linkPlugin,
   imagePlugin,
   InsertImage,
+  codeBlockPlugin,
+  codeMirrorPlugin,
+  InsertCodeBlock,
   type MDXEditorMethods,
 } from "@mdxeditor/editor";
 import "@mdxeditor/editor/style.css";
@@ -111,6 +114,8 @@ const CustomEditor = ({
           linkPlugin(),
           thematicBreakPlugin(),
           markdownShortcutPlugin(),
+          codeBlockPlugin({ defaultCodeBlockLanguage: 'js' }), // 添加代码块插件，默认语言为 JavaScript
+          codeMirrorPlugin({ codeBlockLanguages: { js: 'JavaScript', css: 'CSS', ts: 'TypeScript', json: 'JSON', python: 'Python', java: 'Java', c: 'C', cpp: 'C++', go: 'Go', rust: 'Rust', ruby: 'Ruby', php: 'PHP', swift: 'Swift', kotlin: 'Kotlin', sql: 'SQL', xml: 'XML', html: 'HTML', yaml: 'YAML', shell: 'Shell' } }), // 添加代码镜像插件，支持多种语言
           toolbarPlugin({
             toolbarClassName: "my-classname",
             toolbarContents: () => (
@@ -118,6 +123,7 @@ const CustomEditor = ({
                 <UndoRedo />
                 <BoldItalicUnderlineToggles />
                 <InsertImage />
+                <InsertCodeBlock /> {/* 添加插入代码块按钮 */}
               </>
             ),
           }),

@@ -13,9 +13,14 @@ const CommonClassifyWidget: React.FC = () => {
               prefetch={item?.noPrefetch ? true : false}
               href={{
                 pathname: item.href,
-                query: {
-                  pageNo: 1,
-                },
+                query: item?.id
+                  ? {
+                      pageNo: 1,
+                      tag: item.id,
+                    }
+                  : {
+                      pageNo: 1,
+                    },
               }}
               className="pc:h-[30px] flex justify-center items-center text-white hover:underline hover:decoration-white hover:cursor-pointer box-border pc:p-2"
             >
@@ -24,16 +29,22 @@ const CommonClassifyWidget: React.FC = () => {
           );
         })}
       </div>
-      <div className="w-full mobile:h-[40px] pc:pt-[15px] flex pc:flex-col justify-center items-center gap-3 bg-transparent mobile:text-white border-t-[1px] border-t-[#fff] mobile:border-t-solid">
+      <div className="w-full  mobile:h-[40px] pc:pt-[15px] flex pc:flex-col justify-center items-center gap-3 bg-transparent mobile:text-white border-t-[1px] border-t-[#fff] mobile:border-t-solid">
         {MENU_LIST2.map((item) => {
           return (
             <Link
               prefetch={item?.noPrefetch ? true : false}
               href={{
                 pathname: item.href,
-                query: {
-                  pageNo: 1,
-                },
+                // 关键逻辑：与上方一致，基于 id 生成查询参数，保持 URL 规范
+                query: item?.id
+                  ? {
+                      pageNo: 1,
+                      tag: item.id,
+                    }
+                  : {
+                      pageNo: 1,
+                    },
               }}
               className="pc:h-[30px] flex justify-center items-center text-white hover:underline hover:decoration-white hover:cursor-pointer box-border pc:p-2"
             >

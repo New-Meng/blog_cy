@@ -18,12 +18,12 @@ const CommonPostTitle = ({ isClick = true, baseInfo, tagList }: ParamsType) => {
       <div className="h-full article-title flex items-start justify-between">
         <TitleText baseInfo={baseInfo} />
         <div className="flex flex-col justify-center items-start gao-[4px]">
-          <div className="">
+          <div className="flex justify-center items-center">
             {baseInfo.createdAt
               ? dayjs(baseInfo.createdAt).format("MM/DD")
               : ""}
           </div>
-          <div>
+          <div className="flex justify-center items-center">
             {baseInfo.createdAt ? dayjs(baseInfo.createdAt).format("YYYY") : ""}
           </div>
         </div>

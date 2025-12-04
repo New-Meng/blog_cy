@@ -4,7 +4,7 @@ import MobileSearchInput from "./CommonSearchInput";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { HOME_PAGE } from "@/app/lib/constant";
+import { GITHUB_URL, HOME_PAGE } from "@/app/lib/constant";
 
 const CommonTitleBar: React.FC = () => {
   const router = useRouter();
@@ -55,14 +55,17 @@ const CommonTitleBar: React.FC = () => {
               onSearch={handleSearch}
             ></MobileSearchInput>
           </div>
-          <div className="p-1 rounded-full bg-white">
-            <Image
-              width={imageWidth}
-              height={imageHeight}
-              alt="github"
-              src="/github_icon.png"
-            ></Image>
-          </div>
+          <Link href={GITHUB_URL} target="_blank">
+            <div className="p-1 rounded-full bg-white">
+              <Image
+                width={imageWidth}
+                height={imageHeight}
+                alt="github"
+                src="/github_icon.png"
+              ></Image>
+            </div>
+          </Link>
+
           <div className="p-1 rounded-full bg-white">
             <Image
               width={imageWidth}

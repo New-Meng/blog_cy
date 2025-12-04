@@ -11,6 +11,8 @@ import CustomEditor from "../../components/CustomEditor";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Tag } from "@prisma/client";
 import { Select } from "antd";
+import CommonTitleBar from "../../blogs/[[...slug]]/components/CommonTitleBar";
+import CommonClassifyWidget from "../../blogs/[[...slug]]/components/CommonClassifyWidget";
 
 const Input = dynamic(() =>
   import("antd/es/input").then((mod) => {
@@ -98,11 +100,11 @@ const PostEditPage = () => {
 
   return (
     <div className="w-full h-full">
-      <div className="my-5 flex justify-end items-center">
+      <div className="mobile:p-[20px]  my-5 flex justify-end items-center">
         <AsyncButton onClick={handleEditPublish}>发布修改</AsyncButton>
       </div>
 
-      <div className="w-[1200] h-full margin-[0__auto]">
+      <div className="mobile:p-[20px]  mobile:w-full w-[1200] h-full margin-[0__auto]">
         <Form form={form} labelCol={{ span: 3 }}>
           <Form.Item
             label="文章标题"
