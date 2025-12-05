@@ -6,8 +6,10 @@ import { AsyncButton } from "@/components/client/AsyncButton";
 
 import Form from "antd/es/form";
 import { _$fetch } from "@/app/lib/client/fetch";
-import { useEffect, useState } from "react";
-import CustomEditor from "../../components/CustomEditor";
+import { useEffect, useRef, useState } from "react";
+import CustomEditor, {
+  forwardRefCustomEditType,
+} from "../../components/CustomEditor";
 import { useRouter } from "next/navigation";
 import { ConfigProvider, Select } from "antd";
 import { extractFirstTwoParagraphs } from "@/app/lib/client/clientType";
@@ -42,6 +44,7 @@ const Switch = dynamic(() =>
 const CreatePostPage = () => {
   const [form] = Form.useForm();
   const router = useRouter();
+  const editorRef = useRef<forwardRefCustomEditType>(null);
   const [tagOptions, setTagOptions] = useState<
     {
       label: string;
@@ -68,9 +71,11 @@ const CreatePostPage = () => {
     let params = {
       ...formData,
     };
+    if (editorRef.current && editorRef.current?.getContentMd) {
+      params.content = editorRef.current?.getContentMd?.() || "";
+    }
     // \n\n 转化br标签为<br />
-    const replaceStr = "<br />";
-    params.content = params.content.replace(/\n\n/g, replaceStr);
+    const replaceStr = "/n";
     params.previewContent = extractFirstTwoParagraphs(
       params.content,
       replaceStr
@@ -132,10 +137,9 @@ const CreatePostPage = () => {
               help={<span style={{ color: "#ff4d4f" }}></span>}
               label="文章内容"
               name="content"
-              rules={[{ required: true, message: "文章内容必须填写" }]}
             >
               {/* <Input type="textaera"></Input> */}
-              <CustomEditor></CustomEditor>
+              <CustomEditor ref={editorRef}></CustomEditor>
             </Form.Item>
           </Form>
         </div>

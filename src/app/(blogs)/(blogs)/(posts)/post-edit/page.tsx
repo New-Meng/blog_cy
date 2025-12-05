@@ -6,13 +6,17 @@ import { AsyncButton } from "@/components/client/AsyncButton";
 
 import Form from "antd/es/form";
 import { _$fetch } from "@/app/lib/client/fetch";
-import { useEffect, useState } from "react";
-import CustomEditor from "../../components/CustomEditor";
+import { useEffect, useRef, useState } from "react";
+import CustomEditor, {
+  forwardRefCustomEditType,
+} from "../../components/CustomEditor";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Tag } from "@prisma/client";
 import { Select } from "antd";
 import CommonTitleBar from "../../blogs/[[...slug]]/components/CommonTitleBar";
 import CommonClassifyWidget from "../../blogs/[[...slug]]/components/CommonClassifyWidget";
+import { MDXEditorMethods } from "@mdxeditor/editor";
+import { extractFirstTwoParagraphs } from "@/app/lib/client/clientType";
 
 const Input = dynamic(() =>
   import("antd/es/input").then((mod) => {
@@ -44,17 +48,27 @@ const PostEditPage = () => {
     }[]
   >([]);
 
+  const editorRef = useRef<forwardRefCustomEditType>(null);
+
   const postsId = searchParam.get("postId");
 
   const handleEditPublish = async () => {
     const formData = form.getFieldsValue();
+    if (editorRef.current) {
+      formData.content = editorRef.current?.getContentMd?.() || "";
+    }
+
+    // \n\n 转化br标签为<br />
+    const replaceStr = "\n";
+    formData.previewContent = extractFirstTwoParagraphs(
+      formData.content,
+      replaceStr
+    );
+
     let params = {
       ...formData,
       id: postsId,
     };
-    console.log(formData, "++??");
-    // \n\n 转化br标签为<br />
-    params.content = params.content.replace(/\n\n/g, "<br />");
 
     const res = await _$fetch.post("apiv1/mypost/editpost", {
       body: params,
@@ -128,7 +142,7 @@ const PostEditPage = () => {
             rules={[{ required: true, message: "文章内容必须填写" }]}
           >
             {/* <Input type="textaera"></Input> */}
-            <CustomEditor content={content}></CustomEditor>
+            <CustomEditor ref={editorRef} content={content}></CustomEditor>
           </Form.Item>
         </Form>
       </div>

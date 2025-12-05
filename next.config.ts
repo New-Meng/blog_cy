@@ -23,6 +23,15 @@ const nextConfig: NextConfig = {
       fullUrl: true,
     },
   },
+
+
+  // 开发模式下，构建时缓存
+  onDemandEntries: {
+    // 页面在内存中缓存的时间（毫秒）
+    maxInactiveAge: 25 * 1000 * 60 * 60, // 25小时
+    // 同时保留的页面数
+    pagesBufferLength: 2,
+  },
 };
 
 export default nextConfig;

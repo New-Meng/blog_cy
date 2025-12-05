@@ -1,3 +1,4 @@
+// 注： fetch缓存 和 页面缓存不同，需要单独设置
 export const revalidate = 36000; //静态分析，60 * 60 无效，设置公共缓存时间
 
 import type { Metadata } from "next";

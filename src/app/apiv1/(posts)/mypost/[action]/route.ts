@@ -281,7 +281,7 @@ export const POST = async (
               if (!postResult?.id) {
                 throw new Error("文章不存在");
               }
-
+              // 更新tag关联表
               if (postResult.postTags?.length) {
                 const dataBasTagIds = postResult.postTags.map(
                   (item) => item.id
@@ -319,6 +319,18 @@ export const POST = async (
                   }),
                 });
               }
+
+              await tx.post.update({
+                where: {
+                  id: postResult.id,
+                },
+                data: {
+                  title: body.title,
+                  content: body.content,
+                  published: body.published,
+                  previewContent: body.previewContent,
+                },
+              });
 
               return {
                 message: "更新文章成功",
